@@ -21,21 +21,21 @@ class HomeScreen extends StatelessWidget {
               await FirebaseAuth.instance.signOut();
               if (context.mounted) {
                 Navigator.pushReplacement(
-                  context, 
-                  MaterialPageRoute(builder: (_) => const LoginScreen())
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
                 );
               }
             },
-          )
+          ),
         ],
       ),
       body: const Center(
         child: Text(
           "U r Logged in",
           style: TextStyle(
-            color: Colors.white, 
-            fontSize: 30, 
-            fontWeight: FontWeight.bold
+            color: Colors.white,
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
