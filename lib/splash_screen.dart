@@ -24,7 +24,7 @@ class _DietRxSplashScreenState extends State<DietRxSplashScreen>
     // 1. Setup Logo Animation
     _logoController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 400),
     );
 
     _logoScaleAnimation = CurvedAnimation(
@@ -84,7 +84,7 @@ class _DietRxSplashScreenState extends State<DietRxSplashScreen>
               scale: _logoScaleAnimation,
               child: Image.asset(
                 'assets/images/logo_icon.png',
-                width: 150, 
+                width: 150,
                 height: 150,
               ),
             ),
