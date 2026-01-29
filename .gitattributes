@@ -1,0 +1,1 @@
+assets/database/products.db filter=lfs diff=lfs merge=lfs -text

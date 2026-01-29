@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'scanner_screen.dart';
 import 'main.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -40,6 +41,17 @@ class HomeScreen extends StatelessWidget {
           "U r Logged in",
           style: TextStyle(color: Colors.white, fontSize: 24),
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ScannerScreen()),
+          );
+        },
+        backgroundColor: const Color(0xFF1B4D3E),
+        icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
+        label: const Text("Scan Now", style: TextStyle(color: Colors.white)),
       ),
     );
   }
