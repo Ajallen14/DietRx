@@ -29,7 +29,7 @@ class _DietRxSplashScreenState extends State<DietRxSplashScreen>
 
     _logoScaleAnimation = CurvedAnimation(
       parent: _logoController,
-      curve: Curves.easeOutBack, // Bouncy effect
+      curve: Curves.easeOutBack,
     );
 
     // 2. Setup Text Animation

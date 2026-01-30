@@ -23,9 +23,8 @@ class DatabaseHelper {
 
     File dbFile = File(path);
 
-    // --- 🚀 SMART COPY LOGIC ---
-    // Only skip copy if file exists AND is bigger than 5MB (meaning it's real data)
-    if (await dbFile.exists() && await dbFile.length() > 5 * 1024 * 1024) {
+
+    if (await dbFile.exists() && await dbFile.length() > 3 * 1024 * 1024) {
       print("✅ Valid Database found (${await dbFile.length()} bytes). Skipping copy.");
     } else {
       print("⚠️ Database missing or too small. Copying from assets...");

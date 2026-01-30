@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 );
               }
-            : null, // Button is grey/disabled for the split-second it loads
+            : null,
 
         backgroundColor: _isDbReady
             ? const Color(0xFF1B4D3E)

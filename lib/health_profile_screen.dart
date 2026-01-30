@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'main.dart'; // Need this for AuthWrapper navigation
+import 'main.dart';
 
 class HealthProfileScreen extends StatefulWidget {
   const HealthProfileScreen({super.key});
@@ -12,7 +12,7 @@ class HealthProfileScreen extends StatefulWidget {
 }
 
 class _HealthProfileScreenState extends State<HealthProfileScreen> {
-  // --- DATA SOURCES (Not final anymore, so we can add to them) ---
+  // --- DATA SOURCES ---
   final List<String> _allConditions = [
     'Diabetes',
     'Hypertension',
@@ -62,11 +62,8 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
     // Don't add empty or duplicate items
     if (text.isNotEmpty && !mainList.contains(text)) {
       setState(() {
-        // 1. Add to the main list so a chip is created
         mainList.add(text);
-        // 2. Add to selected list so the chip appears pre-selected
         selectedList.add(text);
-        // 3. Clear the text field
         controller.clear();
       });
     }
@@ -153,7 +150,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
             ),
             const SizedBox(height: 20),
 
-            // Chips List (Conditions)
+            // Chips List
             Wrap(
               spacing: 10,
               runSpacing: 10,
@@ -173,7 +170,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
 
             const SizedBox(height: 15),
 
-            // Add other Condition 
+            // Add other Condition
             _buildAddOtherRow(
               controller: _otherConditionController,
               label: "Add other condition...",
@@ -302,7 +299,6 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
                 vertical: 15,
               ),
             ),
-            // Add on keyboard "Done" press too
             onSubmitted: (_) => onAdd(),
           ),
         ),

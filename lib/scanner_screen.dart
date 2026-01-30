@@ -135,7 +135,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
     }
   }
 
-  // --- 🎨 NEW RESULT SHEET WITH IMAGE ---
+  // --- RESULT SHEET ---
   void _showResultSheet(ScanResult result) {
     showModalBottomSheet(
       context: context,
@@ -157,7 +157,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // 1. PRODUCT IMAGE (Or Icon if offline/missing)
+                // 1. PRODUCT IMAGE
                 if (result.imageUrl != null && result.imageUrl!.isNotEmpty)
                   Container(
                     height: 150,
@@ -195,7 +195,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   ),
                 ),
 
-                // 3. NutriScore Badge (New!)
+                // 3. NutriScore Badge
                 if (result.nutriscore != null) ...[
                   const SizedBox(height: 8),
                   Container(
