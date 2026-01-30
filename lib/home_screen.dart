@@ -1,11 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../services/database_helper.dart';
 import 'scanner_screen.dart';
-import 'main.dart';
+import 'login_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  bool _isDbReady = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initDatabaseInBackground();
+  }
+
+  // Silent Background Init
+  Future<void> _initDatabaseInBackground() async {
+    try {
+      await DatabaseHelper().database;
+      if (mounted) {
+        setState(() {
+          _isDbReady = true;
+        });
+      }
+    } catch (e) {
+      print("Database Init Failed: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,20 +43,15 @@ class HomeScreen extends StatelessWidget {
         title: Text("DietRx", style: GoogleFonts.poppins(color: Colors.white)),
         backgroundColor: const Color(0xFF1B4D3E),
         iconTheme: const IconThemeData(color: Colors.white),
-
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            tooltip: "Logout",
             onPressed: () async {
-              // 1. Sign Out
               await FirebaseAuth.instance.signOut();
-
-              // 2. NAVIGATE DIRECTLY TO AUTHWRAPPER
-              if (context.mounted) {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const AuthWrapper()),
-                  (Route<dynamic> route) => false,
+              if (mounted) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
                 );
               }
             },
@@ -37,21 +60,50 @@ class HomeScreen extends StatelessWidget {
       ),
 
       body: const Center(
-        child: Text(
-          "U r Logged in",
-          style: TextStyle(color: Colors.white, fontSize: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Home Screen",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
       ),
+
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const ScannerScreen()),
-          );
-        },
-        backgroundColor: const Color(0xFF1B4D3E),
-        icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
-        label: const Text("Scan Now", style: TextStyle(color: Colors.white)),
+        onPressed: _isDbReady
+            ? () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ScannerScreen(),
+                  ),
+                );
+              }
+            : null, // Button is grey/disabled for the split-second it loads
+
+        backgroundColor: _isDbReady
+            ? const Color(0xFF1B4D3E)
+            : Colors.grey[800],
+        foregroundColor: Colors.white,
+
+        icon: _isDbReady
+            ? const Icon(Icons.qr_code_scanner)
+            : const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white54,
+                ),
+              ),
+
+        label: Text(_isDbReady ? "Scan Now" : "Readying..."),
       ),
     );
   }
