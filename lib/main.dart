@@ -40,10 +40,11 @@ class AuthWrapper extends StatelessWidget {
       // 1. Check if User is Logged In
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, authSnapshot) {
-        
         // Waiting for Auth...
         if (authSnapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
 
         // 2. User IS Logged In -> Check Database for Profile
@@ -55,13 +56,15 @@ class AuthWrapper extends StatelessWidget {
                 .collection('Health_Profiles')
                 .doc(user.uid)
                 .get(),
-            
+
             builder: (context, dbSnapshot) {
               // Waiting for Database...(Loading screen)
               if (dbSnapshot.connectionState == ConnectionState.waiting) {
                 return const Scaffold(
                   backgroundColor: Color(0xFF1B4D3E),
-                  body: Center(child: CircularProgressIndicator(color: Colors.white)),
+                  body: Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
                 );
               }
 
