@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'main.dart'; // Import main.dart to access AuthWrapper
+import 'main.dart';
 
 class DietRxSplashScreen extends StatefulWidget {
   const DietRxSplashScreen({super.key});
