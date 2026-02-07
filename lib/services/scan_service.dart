@@ -29,11 +29,11 @@ class ScanService {
 
     List<String> warnings = [];
     List<String> unknown = [];
+    bool isMissingData = false;
 
+    // CHECK IF DATA IS COMPLETELY MISSING
     if (sugar == null && salt == null && fat == null && satFat == null) {
-      warnings.add(
-        "Nutrition facts missing. Product data not fully present in database.",
-      );
+      isMissingData = true;
     }
 
     // --- C. FETCH USER PROFILE ---
@@ -90,7 +90,6 @@ class ScanService {
           if (nutrientKey == 'fat_100g') val = fat;
           if (nutrientKey == 'sat_fat_100g') val = satFat;
 
-          // LOGIC
           if (val != null && val > limit) {
             warnings.add("$condition: High $nutrientKey (${val}g > ${limit}g)");
           }
@@ -138,7 +137,9 @@ class ScanService {
     // --- E. FIND ALTERNATIVES ---
     List<Map<String, dynamic>> safeAlternatives = [];
 
-    if (warnings.isNotEmpty && categories != null && categories.isNotEmpty) {
+    if ((warnings.isNotEmpty || isMissingData) &&
+        categories != null &&
+        categories.isNotEmpty) {
       final candidates = await _dbHelper.getAlternatives(categories);
 
       for (var item in candidates) {
@@ -162,7 +163,8 @@ class ScanService {
 
     return ScanResult(
       productName: name,
-      isSafe: warnings.isEmpty,
+      isSafe: warnings.isEmpty && !isMissingData,
+      isMissingData: isMissingData,
       warnings: warnings,
       unknownConditions: unknown,
       alternatives: safeAlternatives,

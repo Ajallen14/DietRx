@@ -1,6 +1,7 @@
 class ScanResult {
   final String productName;
   final bool isSafe;
+  final bool isMissingData;
   final List<String> warnings;
   final List<String> unknownConditions;
   final String? imageUrl;
@@ -14,12 +15,12 @@ class ScanResult {
   final double? fat;
   final double? calories;
 
-  // 🚀 NEW: List of alternate safe products
   final List<Map<String, dynamic>> alternatives;
 
   ScanResult({
     required this.productName,
     required this.isSafe,
+    required this.isMissingData,
     required this.warnings,
     required this.unknownConditions,
     required this.alternatives,

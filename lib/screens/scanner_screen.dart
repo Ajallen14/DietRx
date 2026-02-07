@@ -27,18 +27,14 @@ class _ScannerScreenState extends State<ScannerScreen> {
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
-      // 🚀 FIX: LayoutBuilder gives us the exact size of the body (minus AppBar)
       body: LayoutBuilder(
         builder: (context, constraints) {
-          // 1. Calculate True Center relative to the camera view
           final double scanWindowWidth = 300;
           final double scanWindowHeight = 150;
-
           final Offset center = Offset(
             constraints.maxWidth / 2,
             constraints.maxHeight / 2,
           );
-
           final Rect scanWindow = Rect.fromCenter(
             center: center,
             width: scanWindowWidth,
@@ -47,7 +43,6 @@ class _ScannerScreenState extends State<ScannerScreen> {
 
           return Stack(
             children: [
-              // 1. CAMERA LAYER
               MobileScanner(
                 controller: _controller,
                 onDetect: (capture) {
@@ -58,16 +53,11 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   }
                 },
               ),
-
-              // 2. VISUAL OVERLAY LAYER (Correctly Centered)
               CustomPaint(
                 size: Size(constraints.maxWidth, constraints.maxHeight),
                 painter: ScannerOverlay(scanWindow),
               ),
-
-              // 3. HINT TEXT (Positioned relative to the box)
               Positioned(
-                // Place it 40 pixels below the green box
                 top: center.dy + (scanWindowHeight / 2) + 20,
                 left: 0,
                 right: 0,
@@ -77,8 +67,6 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   style: TextStyle(color: Colors.white70, fontSize: 16),
                 ),
               ),
-
-              // 4. LOADING INDICATOR
               if (_isProcessing)
                 Container(
                   color: Colors.black54,
@@ -111,10 +99,47 @@ class _ScannerScreenState extends State<ScannerScreen> {
   }
 
   void _showResultSheet(ScanResult result) {
+    Color bgColor;
+    Color textColor;
+    String titleText;
+    Widget statusWidget;
+
+    if (result.isMissingData) {
+      // 🟠 STATE 1: MISSING DATA
+      bgColor = Colors.orange.shade50;
+      textColor = Colors.orange.shade900;
+      titleText = "UNKNOWN STATUS";
+      statusWidget = Column(
+        children: [
+          Text(
+            "Nutrition facts missing.\nProduct data not fully present in database.",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.orange.shade800,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      );
+    } else if (result.isSafe) {
+      // STATE 2: SAFE
+      bgColor = Colors.green.shade50;
+      textColor = Colors.green.shade800;
+      titleText = "SAFE TO EAT";
+      statusWidget = Container();
+    } else {
+      // STATE 3: UNSAFE
+      bgColor = Colors.red.shade50;
+      textColor = Colors.red.shade800;
+      titleText = "AVOID THIS";
+      statusWidget = Container();
+    }
+
     showModalBottomSheet(
       context: context,
       isDismissible: false,
-      backgroundColor: result.isSafe ? Colors.green[50] : Colors.red[50],
+      backgroundColor: bgColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -128,6 +153,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // 1. PRODUCT HEADER
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -185,15 +211,23 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
+
+                // 2. MAIN STATUS TITLE
                 Text(
-                  result.isSafe ? "SAFE TO EAT" : "AVOID THIS",
+                  titleText,
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: result.isSafe ? Colors.green[800] : Colors.red[800],
+                    color: textColor,
                   ),
                 ),
-                if (!result.isSafe) ...[
+                const SizedBox(height: 10),
+
+                // 3. STATUS WIDGET
+                statusWidget,
+
+                // 4. WARNINGS
+                if (!result.isSafe && !result.isMissingData) ...[
                   const Divider(),
                   ...result.warnings.map(
                     (w) => ListTile(
@@ -208,12 +242,16 @@ class _ScannerScreenState extends State<ScannerScreen> {
                       dense: true,
                     ),
                   ),
+                ],
+
+                // 5. ALTERNATIVES
+                if (!result.isSafe) ...[
                   const SizedBox(height: 20),
                   if (result.alternatives.isNotEmpty) ...[
                     const Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        "✅ Try These Instead (Tap for Info):",
+                        "Try These Instead (Tap for Info):",
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -310,7 +348,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            "(We strictly hid items with unknown sugar/salt levels for your safety)",
+                            "(We strictly hid items with unknown nutrient levels for your safety)",
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey,
@@ -323,6 +361,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                     ),
                   ],
                 ],
+
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
@@ -355,7 +394,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              "✅ It belongs to the same specific category.",
+              "It belongs to the same specific category.",
               style: TextStyle(fontStyle: FontStyle.italic),
             ),
             const SizedBox(height: 10),
@@ -425,36 +464,29 @@ class _ScannerScreenState extends State<ScannerScreen> {
 
 class ScannerOverlay extends CustomPainter {
   final Rect scanWindow;
-
   ScannerOverlay(this.scanWindow);
 
   @override
   void paint(Canvas canvas, Size size) {
     final backgroundPath = Path()
       ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
-
     final cutoutPath = Path()
       ..addRRect(
         RRect.fromRectAndRadius(scanWindow, const Radius.circular(12)),
       );
-
     final path = Path.combine(
       PathOperation.difference,
       backgroundPath,
       cutoutPath,
     );
-
     final overlayPaint = Paint()
       ..color = Colors.black.withOpacity(0.6)
       ..style = PaintingStyle.fill;
-
     canvas.drawPath(path, overlayPaint);
-
     final borderPaint = Paint()
       ..color = Colors.green
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3.0;
-
     canvas.drawRRect(
       RRect.fromRectAndRadius(scanWindow, const Radius.circular(12)),
       borderPaint,
@@ -462,7 +494,5 @@ class ScannerOverlay extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
-  }
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
