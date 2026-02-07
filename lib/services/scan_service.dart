@@ -2,38 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'database_helper.dart';
 import '../utils/health_rules.dart';
-
-class ScanResult {
-  final String productName;
-  final bool isSafe;
-  final List<String> warnings;
-  final List<String> unknownConditions;
-  final String? imageUrl;
-  final String? nutriscore;
-  final int? novaGroup;
-  final String? categories;
-  final String? labels;
-  final double? sugar;
-  final double? salt;
-  final double? fat;
-  final double? calories;
-
-  ScanResult({
-    required this.productName,
-    required this.isSafe,
-    required this.warnings,
-    required this.unknownConditions,
-    this.imageUrl,
-    this.nutriscore,
-    this.novaGroup,
-    this.categories,
-    this.labels,
-    this.sugar,
-    this.salt,
-    this.fat,
-    this.calories,
-  });
-}
+import '../models/scan_result.dart';
 
 class ScanService {
   final DatabaseHelper _dbHelper = DatabaseHelper();
@@ -100,7 +69,7 @@ class ScanService {
       print("Error fetching profile: $e");
     }
 
-    // D. ANALYZE HEALTH RULES
+    // D. ANALYZE HEALTH RULES (Main Logic)
     List<String> warnings = [];
     List<String> unknown = [];
 
@@ -109,7 +78,6 @@ class ScanService {
       if (diseaseRules.containsKey(condition)) {
         final rule = diseaseRules[condition]!;
 
-        // Rule A: Nutrient Limits
         rule.nutrientLimits.forEach((nutrientKey, limit) {
           double? val;
           if (nutrientKey == 'sugar_100g') val = sugar;
@@ -118,11 +86,12 @@ class ScanService {
           if (nutrientKey == 'sat_fat_100g') val = satFat;
 
           if (val != null && val > limit) {
-            warnings.add("$condition: High $nutrientKey (${val}g > ${limit}g)");
+            warnings.add(
+              "$condition: High $nutrientKey (${val}g > ${limit}g)",
+            );
           }
         });
 
-        // Rule B: Forbidden Keywords
         for (var forbidden in rule.forbiddenKeywords) {
           if (ingredients.contains(forbidden.toLowerCase())) {
             warnings.add("$condition: Contains '$forbidden'");
@@ -159,7 +128,32 @@ class ScanService {
 
     // 3. Nova Warning
     if (novaGroup == 4) {
-      warnings.add("Ultra-Processed Food (Nova 4)");
+      warnings.add(" Ultra-Processed Food (Nova 4)");
+    }
+
+    // --- E. FIND ALTERNATIVES ---
+    List<Map<String, dynamic>> safeAlternatives = [];
+
+    if (warnings.isNotEmpty && categories != null && categories.isNotEmpty) {
+      final candidates = await _dbHelper.getAlternatives(categories);
+
+      for (var item in candidates) {
+        if (item['barcode'] == barcode) continue;
+
+        String? safetyReason = _getSafetyReason(
+          item,
+          userConditions,
+          userAllergies,
+        );
+
+        if (safetyReason != null) {
+          Map<String, dynamic> safeItem = Map<String, dynamic>.from(item);
+          safeItem['match_reason'] = safetyReason;
+          safeAlternatives.add(safeItem);
+        }
+
+        if (safeAlternatives.length >= 5) break;
+      }
     }
 
     return ScanResult(
@@ -167,6 +161,7 @@ class ScanService {
       isSafe: warnings.isEmpty,
       warnings: warnings,
       unknownConditions: unknown,
+      alternatives: safeAlternatives,
       imageUrl: imageUrl,
       nutriscore: nutriscore,
       novaGroup: novaGroup,
@@ -177,5 +172,70 @@ class ScanService {
       fat: fat,
       calories: calories,
     );
+  }
+
+  String? _getSafetyReason(
+    Map<String, dynamic> item,
+    List<String> conditions,
+    List<String> allergies,
+  ) {
+    String ingredients = (item['ingredients'] ?? "").toLowerCase();
+    String allergenCol = (item['allergens'] ?? "").toLowerCase();
+
+    double? sugar = item['sugars_100g'] as double?;
+    double? salt = item['salt_100g'] as double?;
+    double? fat = item['fat_100g'] as double?;
+    double? satFat = item['saturated_fat_100g'] as double?;
+
+    List<String> goodPoints = [];
+
+    // 1. Check Conditions
+    for (var condition in conditions) {
+      if (diseaseRules.containsKey(condition)) {
+        final rule = diseaseRules[condition]!;
+
+        // Check Limits
+        bool failed = false;
+        rule.nutrientLimits.forEach((key, limit) {
+          double? val;
+          if (key == 'sugar_100g') val = sugar;
+          if (key == 'salt_100g') val = salt;
+          if (key == 'fat_100g') val = fat;
+          if (key == 'sat_fat_100g') val = satFat;
+
+          if (val == null) {
+            failed = true; // Reject because data is missing
+          }
+          else if (val > limit) {
+            failed = true;
+          } else {
+            goodPoints.add("Low ${key.replaceAll('_100g', '')} (${val}g)");
+          }
+        });
+
+        if (failed) return null;
+
+        for (var forbidden in rule.forbiddenKeywords) {
+          if (ingredients.contains(forbidden.toLowerCase())) return null;
+        }
+      }
+    }
+
+    // 2. Check Allergies
+    for (var allergy in allergies) {
+      if (allergenCol.contains(allergy.toLowerCase())) return null;
+      if (ingredients.contains(allergy.toLowerCase())) return null;
+
+      if (diseaseRules.containsKey(allergy)) {
+        for (var forbidden in diseaseRules[allergy]!.forbiddenKeywords) {
+          if (ingredients.contains(forbidden.toLowerCase())) return null;
+        }
+      }
+      goodPoints.add("No $allergy");
+    }
+
+    if (goodPoints.isEmpty) return "Safe for general consumption.";
+
+    return goodPoints.toSet().join(" • ");
   }
 }

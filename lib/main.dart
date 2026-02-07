@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import 'splash_screen.dart';
-import 'home_screen.dart';
-import 'login_screen.dart';
-import 'health_profile_screen.dart';
+import 'screens/splash_screen.dart';
+import 'screens/home_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/health_profile_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -58,7 +57,7 @@ class AuthWrapper extends StatelessWidget {
                 .get(),
 
             builder: (context, dbSnapshot) {
-              // Waiting for Database...(Loading screen)
+              // Waiting for Database (Loading screen)
               if (dbSnapshot.connectionState == ConnectionState.waiting) {
                 return const Scaffold(
                   backgroundColor: Color(0xFF1B4D3E),
