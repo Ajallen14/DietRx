@@ -21,20 +21,30 @@ class ScanService {
     String? categories = product['categories'];
     String? labels = product['labels'];
 
-    double? sugar = product['sugars_100g'] as double?;
-    double? salt = product['salt_100g'] as double?;
-    double? fat = product['fat_100g'] as double?;
-    double? satFat = product['saturated_fat_100g'] as double?;
-    double? calories = product['calories_100g'] as double?;
+    // Map nutrients
+    Map<String, double?> nutrients = {
+      'sugar_100g': product['sugars_100g'] as double?,
+      'salt_100g': product['salt_100g'] as double?,
+      'fat_100g': product['fat_100g'] as double?,
+      'sat_fat_100g': product['saturated_fat_100g'] as double?,
+      'calories_100g': product['calories_100g'] as double?,
+      'carbs_100g': product['carbohydrates_100g'] as double?,
+      'sodium_100g': product['sodium_100g'] as double?,
+      'cholesterol_100g': product['cholesterol_100g'] as double?,
+      'trans_fat_100g': product['trans_fat_100g'] as double?,
+    };
 
     List<String> warnings = [];
     List<String> unknown = [];
-    bool isMissingData = false;
 
-    // CHECK IF DATA IS COMPLETELY MISSING
-    if (sugar == null && salt == null && fat == null && satFat == null) {
-      isMissingData = true;
-    }
+    // 🚀 RESTORED LOGIC (Condition 1):
+    // Only flag "Missing Data" if ALL main nutrients are empty.
+    // If even one exists, we proceed to check it.
+    bool isMissingData =
+        (nutrients['sugar_100g'] == null &&
+        nutrients['salt_100g'] == null &&
+        nutrients['fat_100g'] == null &&
+        nutrients['sat_fat_100g'] == null);
 
     // --- C. FETCH USER PROFILE ---
     List<String> userConditions = [];
@@ -79,25 +89,29 @@ class ScanService {
     }
 
     // D. ANALYZE HEALTH RULES
+    // We only run this if we actually have some data (or to check ingredients)
     for (var condition in userConditions) {
       if (diseaseRules.containsKey(condition)) {
         final rule = diseaseRules[condition]!;
 
+        // 1. Check Nutrient Limits
         rule.nutrientLimits.forEach((nutrientKey, limit) {
-          double? val;
-          if (nutrientKey == 'sugar_100g') val = sugar;
-          if (nutrientKey == 'salt_100g') val = salt;
-          if (nutrientKey == 'fat_100g') val = fat;
-          if (nutrientKey == 'sat_fat_100g') val = satFat;
+          double? val = nutrients[nutrientKey];
 
+          // 🚀 PERMISSIVE CHECK (Condition 1):
+          // If value is missing (null), IGNORE IT. Assume safe.
+          // Only flag if value EXISTS and EXCEEDS limit.
           if (val != null && val > limit) {
-            warnings.add("$condition: High $nutrientKey (${val}g > ${limit}g)");
+            warnings.add(
+              "🛑 $condition: High $nutrientKey (${val}g > ${limit}g)",
+            );
           }
         });
 
+        // 2. Check Ingredients (Text)
         for (var forbidden in rule.forbiddenKeywords) {
           if (ingredients.contains(forbidden.toLowerCase())) {
-            warnings.add("$condition: Contains '$forbidden'");
+            warnings.add("⚠️ $condition: Contains '$forbidden'");
             break;
           }
         }
@@ -108,21 +122,20 @@ class ScanService {
 
     // 2. Check Allergies
     String allergenCol = (product['allergens'] ?? "").toLowerCase();
-
     for (var allergy in userAllergies) {
       if (allergenCol.contains(allergy.toLowerCase())) {
-        warnings.add("ALLERGY: Contains $allergy");
+        warnings.add("☠️ ALLERGY: Contains $allergy");
         continue;
       }
       if (ingredients.contains(allergy.toLowerCase())) {
-        warnings.add("ALLERGY: Contains $allergy (Found in ingredients)");
+        warnings.add("☠️ ALLERGY: Contains $allergy (Found in ingredients)");
         continue;
       }
       if (diseaseRules.containsKey(allergy)) {
         final rule = diseaseRules[allergy]!;
         for (var forbidden in rule.forbiddenKeywords) {
           if (ingredients.contains(forbidden.toLowerCase())) {
-            warnings.add("ALLERGY: Contains $forbidden");
+            warnings.add("☠️ ALLERGY: Contains $forbidden");
             break;
           }
         }
@@ -131,12 +144,13 @@ class ScanService {
 
     // 3. Nova Warning
     if (novaGroup == 4) {
-      warnings.add("Ultra-Processed Food (Nova 4)");
+      warnings.add("🏭 Ultra-Processed Food (Nova 4)");
     }
 
     // --- E. FIND ALTERNATIVES ---
     List<Map<String, dynamic>> safeAlternatives = [];
 
+    // Only look for alternatives if Unsafe or Totally Missing Data
     if ((warnings.isNotEmpty || isMissingData) &&
         categories != null &&
         categories.isNotEmpty) {
@@ -163,6 +177,8 @@ class ScanService {
 
     return ScanResult(
       productName: name,
+      // 🚀 FINAL STATUS:
+      // Safe if: No Warnings AND Data isn't completely missing
       isSafe: warnings.isEmpty && !isMissingData,
       isMissingData: isMissingData,
       warnings: warnings,
@@ -173,13 +189,14 @@ class ScanService {
       novaGroup: novaGroup,
       categories: categories,
       labels: labels,
-      sugar: sugar,
-      salt: salt,
-      fat: fat,
-      calories: calories,
+      sugar: nutrients['sugar_100g'],
+      salt: nutrients['salt_100g'],
+      fat: nutrients['fat_100g'],
+      calories: nutrients['calories_100g'],
     );
   }
 
+  // 🛠️ HELPER (Kept strict for alternatives)
   String? _getSafetyReason(
     Map<String, dynamic> item,
     List<String> conditions,
@@ -188,10 +205,16 @@ class ScanService {
     String ingredients = (item['ingredients'] ?? "").toLowerCase();
     String allergenCol = (item['allergens'] ?? "").toLowerCase();
 
-    double? sugar = item['sugars_100g'] as double?;
-    double? salt = item['salt_100g'] as double?;
-    double? fat = item['fat_100g'] as double?;
-    double? satFat = item['saturated_fat_100g'] as double?;
+    Map<String, double?> nutrients = {
+      'sugar_100g': item['sugars_100g'] as double?,
+      'salt_100g': item['salt_100g'] as double?,
+      'fat_100g': item['fat_100g'] as double?,
+      'sat_fat_100g': item['saturated_fat_100g'] as double?,
+      'carbs_100g': item['carbohydrates_100g'] as double?,
+      'sodium_100g': item['sodium_100g'] as double?,
+      'cholesterol_100g': item['cholesterol_100g'] as double?,
+      'trans_fat_100g': item['trans_fat_100g'] as double?,
+    };
 
     List<String> goodPoints = [];
 
@@ -201,19 +224,14 @@ class ScanService {
 
         bool failed = false;
         rule.nutrientLimits.forEach((key, limit) {
-          double? val;
-          if (key == 'sugar_100g') val = sugar;
-          if (key == 'salt_100g') val = salt;
-          if (key == 'fat_100g') val = fat;
-          if (key == 'sat_fat_100g') val = satFat;
-
-          if (val == null) {
+          double? val = nutrients[key];
+          // Alternatives: We prefer known data, so we fail if null
+          if (val == null)
             failed = true;
-          } else if (val > limit) {
+          else if (val > limit)
             failed = true;
-          } else {
+          else
             goodPoints.add("Low ${key.replaceAll('_100g', '')} (${val}g)");
-          }
         });
 
         if (failed) return null;
