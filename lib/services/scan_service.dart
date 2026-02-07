@@ -27,6 +27,15 @@ class ScanService {
     double? satFat = product['saturated_fat_100g'] as double?;
     double? calories = product['calories_100g'] as double?;
 
+    List<String> warnings = [];
+    List<String> unknown = [];
+
+    if (sugar == null && salt == null && fat == null && satFat == null) {
+      warnings.add(
+        "Nutrition facts missing. Product data not fully present in database.",
+      );
+    }
+
     // --- C. FETCH USER PROFILE ---
     List<String> userConditions = [];
     List<String> userAllergies = [];
@@ -69,11 +78,7 @@ class ScanService {
       print("Error fetching profile: $e");
     }
 
-    // D. ANALYZE HEALTH RULES (Main Logic)
-    List<String> warnings = [];
-    List<String> unknown = [];
-
-    // 1. Check Diseases
+    // D. ANALYZE HEALTH RULES
     for (var condition in userConditions) {
       if (diseaseRules.containsKey(condition)) {
         final rule = diseaseRules[condition]!;
@@ -85,10 +90,9 @@ class ScanService {
           if (nutrientKey == 'fat_100g') val = fat;
           if (nutrientKey == 'sat_fat_100g') val = satFat;
 
+          // LOGIC
           if (val != null && val > limit) {
-            warnings.add(
-              "$condition: High $nutrientKey (${val}g > ${limit}g)",
-            );
+            warnings.add("$condition: High $nutrientKey (${val}g > ${limit}g)");
           }
         });
 
@@ -128,7 +132,7 @@ class ScanService {
 
     // 3. Nova Warning
     if (novaGroup == 4) {
-      warnings.add(" Ultra-Processed Food (Nova 4)");
+      warnings.add("Ultra-Processed Food (Nova 4)");
     }
 
     // --- E. FIND ALTERNATIVES ---
@@ -189,12 +193,10 @@ class ScanService {
 
     List<String> goodPoints = [];
 
-    // 1. Check Conditions
     for (var condition in conditions) {
       if (diseaseRules.containsKey(condition)) {
         final rule = diseaseRules[condition]!;
 
-        // Check Limits
         bool failed = false;
         rule.nutrientLimits.forEach((key, limit) {
           double? val;
@@ -204,9 +206,8 @@ class ScanService {
           if (key == 'sat_fat_100g') val = satFat;
 
           if (val == null) {
-            failed = true; // Reject because data is missing
-          }
-          else if (val > limit) {
+            failed = true;
+          } else if (val > limit) {
             failed = true;
           } else {
             goodPoints.add("Low ${key.replaceAll('_100g', '')} (${val}g)");
@@ -221,16 +222,9 @@ class ScanService {
       }
     }
 
-    // 2. Check Allergies
     for (var allergy in allergies) {
       if (allergenCol.contains(allergy.toLowerCase())) return null;
       if (ingredients.contains(allergy.toLowerCase())) return null;
-
-      if (diseaseRules.containsKey(allergy)) {
-        for (var forbidden in diseaseRules[allergy]!.forbiddenKeywords) {
-          if (ingredients.contains(forbidden.toLowerCase())) return null;
-        }
-      }
       goodPoints.add("No $allergy");
     }
 

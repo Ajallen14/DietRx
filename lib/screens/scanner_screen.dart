@@ -27,26 +27,68 @@ class _ScannerScreenState extends State<ScannerScreen> {
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
-      body: Stack(
-        children: [
-          MobileScanner(
-            controller: _controller,
-            onDetect: (capture) {
-              if (_isProcessing) return;
-              if (capture.barcodes.isNotEmpty &&
-                  capture.barcodes.first.rawValue != null) {
-                _handleScan(capture.barcodes.first.rawValue!);
-              }
-            },
-          ),
-          if (_isProcessing)
-            Container(
-              color: Colors.black54,
-              child: const Center(
-                child: CircularProgressIndicator(color: Colors.green),
+      // 🚀 FIX: LayoutBuilder gives us the exact size of the body (minus AppBar)
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // 1. Calculate True Center relative to the camera view
+          final double scanWindowWidth = 300;
+          final double scanWindowHeight = 150;
+
+          final Offset center = Offset(
+            constraints.maxWidth / 2,
+            constraints.maxHeight / 2,
+          );
+
+          final Rect scanWindow = Rect.fromCenter(
+            center: center,
+            width: scanWindowWidth,
+            height: scanWindowHeight,
+          );
+
+          return Stack(
+            children: [
+              // 1. CAMERA LAYER
+              MobileScanner(
+                controller: _controller,
+                onDetect: (capture) {
+                  if (_isProcessing) return;
+                  if (capture.barcodes.isNotEmpty &&
+                      capture.barcodes.first.rawValue != null) {
+                    _handleScan(capture.barcodes.first.rawValue!);
+                  }
+                },
               ),
-            ),
-        ],
+
+              // 2. VISUAL OVERLAY LAYER (Correctly Centered)
+              CustomPaint(
+                size: Size(constraints.maxWidth, constraints.maxHeight),
+                painter: ScannerOverlay(scanWindow),
+              ),
+
+              // 3. HINT TEXT (Positioned relative to the box)
+              Positioned(
+                // Place it 40 pixels below the green box
+                top: center.dy + (scanWindowHeight / 2) + 20,
+                left: 0,
+                right: 0,
+                child: const Text(
+                  "Place barcode inside the green box",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white70, fontSize: 16),
+                ),
+              ),
+
+              // 4. LOADING INDICATOR
+              if (_isProcessing)
+                Container(
+                  color: Colors.black54,
+                  child: const Center(
+                    child: CircularProgressIndicator(color: Colors.green),
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -86,7 +128,6 @@ class _ScannerScreenState extends State<ScannerScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // 1. IMAGE & BADGES ROW
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -144,8 +185,6 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
-
-                // 2. VERDICT TITLE
                 Text(
                   result.isSafe ? "SAFE TO EAT" : "AVOID THIS",
                   style: TextStyle(
@@ -154,11 +193,8 @@ class _ScannerScreenState extends State<ScannerScreen> {
                     color: result.isSafe ? Colors.green[800] : Colors.red[800],
                   ),
                 ),
-
-                // 3. WARNINGS & ALTERNATIVES SECTION
                 if (!result.isSafe) ...[
                   const Divider(),
-                  // List Warnings
                   ...result.warnings.map(
                     (w) => ListTile(
                       leading: const Icon(Icons.cancel, color: Colors.red),
@@ -172,12 +208,8 @@ class _ScannerScreenState extends State<ScannerScreen> {
                       dense: true,
                     ),
                   ),
-
                   const SizedBox(height: 20),
-
-                  // 🚀 ALTERNATIVES LOGIC
                   if (result.alternatives.isNotEmpty) ...[
-                    // A. Show List of Alternatives
                     const Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -255,7 +287,6 @@ class _ScannerScreenState extends State<ScannerScreen> {
                       ),
                     ),
                   ] else ...[
-                    // B. Show "No Alternatives" Message
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
@@ -279,7 +310,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            "(We strictly hid items with unknown nutrient levels for your safety)",
+                            "(We strictly hid items with unknown sugar/salt levels for your safety)",
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey,
@@ -292,7 +323,6 @@ class _ScannerScreenState extends State<ScannerScreen> {
                     ),
                   ],
                 ],
-
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
@@ -315,7 +345,6 @@ class _ScannerScreenState extends State<ScannerScreen> {
     );
   }
 
-  // REASON POPUP DIALOG
   void _showReasonDialog(Map<String, dynamic> altProduct) {
     showDialog(
       context: context,
@@ -326,13 +355,12 @@ class _ScannerScreenState extends State<ScannerScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              "It belongs to the same specific category.",
+              "✅ It belongs to the same specific category.",
               style: TextStyle(fontStyle: FontStyle.italic),
             ),
             const SizedBox(height: 10),
             const Divider(),
             const SizedBox(height: 10),
-            // Show the generated reason
             Text(
               altProduct['match_reason'] ?? "It fits all your health limits.",
               style: const TextStyle(
@@ -392,5 +420,49 @@ class _ScannerScreenState extends State<ScannerScreen> {
         ],
       ),
     );
+  }
+}
+
+class ScannerOverlay extends CustomPainter {
+  final Rect scanWindow;
+
+  ScannerOverlay(this.scanWindow);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final backgroundPath = Path()
+      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
+
+    final cutoutPath = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(scanWindow, const Radius.circular(12)),
+      );
+
+    final path = Path.combine(
+      PathOperation.difference,
+      backgroundPath,
+      cutoutPath,
+    );
+
+    final overlayPaint = Paint()
+      ..color = Colors.black.withOpacity(0.6)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawPath(path, overlayPaint);
+
+    final borderPaint = Paint()
+      ..color = Colors.green
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.0;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(scanWindow, const Radius.circular(12)),
+      borderPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
   }
 }
