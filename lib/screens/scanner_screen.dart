@@ -27,7 +27,6 @@ class _ScannerScreenState extends State<ScannerScreen> {
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
-      // 🚀 LayoutBuilder ensures the Green Box is perfectly centered
       body: LayoutBuilder(
         builder: (context, constraints) {
           final double scanWindowWidth = 300;
@@ -54,12 +53,10 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   }
                 },
               ),
-              // 🖌️ Visual Overlay (Green Box)
               CustomPaint(
                 size: Size(constraints.maxWidth, constraints.maxHeight),
                 painter: ScannerOverlay(scanWindow),
               ),
-              // 📝 Hint Text below the box
               Positioned(
                 top: center.dy + (scanWindowHeight / 2) + 20,
                 left: 0,
@@ -102,13 +99,12 @@ class _ScannerScreenState extends State<ScannerScreen> {
   }
 
   void _showResultSheet(ScanResult result) {
-    // 🎨 DETERMINE COLORS & TEXT BEFORE BUILDING UI
     Color bgColor;
     Color textColor;
     String titleText;
     Widget statusWidget;
 
-    // 🚀 LOGIC FOR 3 STATES
+    // LOGIC FOR 3 STATES
     if (result.isMissingData) {
       // 🟠 STATE 1: MISSING RELEVANT DATA (Orange)
       bgColor = Colors.orange.shade50;
@@ -144,13 +140,13 @@ class _ScannerScreenState extends State<ScannerScreen> {
       bgColor = Colors.green.shade50;
       textColor = Colors.green.shade800;
       titleText = "SAFE TO EAT";
-      statusWidget = Container(); // Clean look for safe items
+      statusWidget = Container();
     } else {
       // 🔴 STATE 3: UNSAFE (Red)
       bgColor = Colors.red.shade50;
       textColor = Colors.red.shade800;
       titleText = "AVOID THIS";
-      statusWidget = Container(); // Warnings list will handle the details
+      statusWidget = Container();
     }
 
     showModalBottomSheet(
@@ -170,7 +166,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // 1. PRODUCT HEADER (Image + Title)
+                // 1. PRODUCT HEADER
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -240,10 +236,10 @@ class _ScannerScreenState extends State<ScannerScreen> {
                 ),
                 const SizedBox(height: 10),
 
-                // 3. STATUS WIDGET (Icon + Text for Unknown state)
+                // 3. STATUS WIDGET
                 statusWidget,
 
-                // 4. WARNINGS LIST (Only show if NOT missing data AND NOT safe)
+                // 4. WARNINGS LIST 
                 if (!result.isSafe && !result.isMissingData) ...[
                   const Divider(),
                   ...result.warnings.map(
@@ -271,7 +267,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                     const Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        "✅ Try These Instead (Tap for Info):",
+                        "Try These Instead (Tap for Info):",
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -405,7 +401,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
     );
   }
 
-  // 🚀 REASON DIALOG for Alternatives
+  // REASON DIALOG for Alternatives
   void _showReasonDialog(Map<String, dynamic> altProduct) {
     showDialog(
       context: context,
@@ -484,7 +480,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
   }
 }
 
-// 🚀 OVERLAY PAINTER (Draws the Green Box with clear hole)
+// OVERLAY PAINTER 
 class ScannerOverlay extends CustomPainter {
   final Rect scanWindow;
   ScannerOverlay(this.scanWindow);
@@ -498,20 +494,17 @@ class ScannerOverlay extends CustomPainter {
         RRect.fromRectAndRadius(scanWindow, const Radius.circular(12)),
       );
 
-    // Create the hole
     final path = Path.combine(
       PathOperation.difference,
       backgroundPath,
       cutoutPath,
     );
 
-    // Draw Dark Background
     final overlayPaint = Paint()
       ..color = Colors.black.withOpacity(0.6)
       ..style = PaintingStyle.fill;
     canvas.drawPath(path, overlayPaint);
 
-    // Draw Green Border
     final borderPaint = Paint()
       ..color = Colors.green
       ..style = PaintingStyle.stroke

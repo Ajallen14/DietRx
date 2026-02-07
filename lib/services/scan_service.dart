@@ -37,9 +37,6 @@ class ScanService {
     List<String> warnings = [];
     List<String> unknown = [];
 
-    // 🚀 RESTORED LOGIC (Condition 1):
-    // Only flag "Missing Data" if ALL main nutrients are empty.
-    // If even one exists, we proceed to check it.
     bool isMissingData =
         (nutrients['sugar_100g'] == null &&
         nutrients['salt_100g'] == null &&
@@ -89,7 +86,7 @@ class ScanService {
     }
 
     // D. ANALYZE HEALTH RULES
-    // We only run this if we actually have some data (or to check ingredients)
+
     for (var condition in userConditions) {
       if (diseaseRules.containsKey(condition)) {
         final rule = diseaseRules[condition]!;
@@ -98,12 +95,9 @@ class ScanService {
         rule.nutrientLimits.forEach((nutrientKey, limit) {
           double? val = nutrients[nutrientKey];
 
-          // 🚀 PERMISSIVE CHECK (Condition 1):
-          // If value is missing (null), IGNORE IT. Assume safe.
-          // Only flag if value EXISTS and EXCEEDS limit.
           if (val != null && val > limit) {
             warnings.add(
-              "🛑 $condition: High $nutrientKey (${val}g > ${limit}g)",
+              "$condition: High $nutrientKey (${val}g > ${limit}g)",
             );
           }
         });
@@ -111,7 +105,7 @@ class ScanService {
         // 2. Check Ingredients (Text)
         for (var forbidden in rule.forbiddenKeywords) {
           if (ingredients.contains(forbidden.toLowerCase())) {
-            warnings.add("⚠️ $condition: Contains '$forbidden'");
+            warnings.add("$condition: Contains '$forbidden'");
             break;
           }
         }
@@ -124,18 +118,18 @@ class ScanService {
     String allergenCol = (product['allergens'] ?? "").toLowerCase();
     for (var allergy in userAllergies) {
       if (allergenCol.contains(allergy.toLowerCase())) {
-        warnings.add("☠️ ALLERGY: Contains $allergy");
+        warnings.add("ALLERGY: Contains $allergy");
         continue;
       }
       if (ingredients.contains(allergy.toLowerCase())) {
-        warnings.add("☠️ ALLERGY: Contains $allergy (Found in ingredients)");
+        warnings.add("ALLERGY: Contains $allergy (Found in ingredients)");
         continue;
       }
       if (diseaseRules.containsKey(allergy)) {
         final rule = diseaseRules[allergy]!;
         for (var forbidden in rule.forbiddenKeywords) {
           if (ingredients.contains(forbidden.toLowerCase())) {
-            warnings.add("☠️ ALLERGY: Contains $forbidden");
+            warnings.add("ALLERGY: Contains $forbidden");
             break;
           }
         }
@@ -144,7 +138,7 @@ class ScanService {
 
     // 3. Nova Warning
     if (novaGroup == 4) {
-      warnings.add("🏭 Ultra-Processed Food (Nova 4)");
+      warnings.add("Ultra-Processed Food (Nova 4)");
     }
 
     // --- E. FIND ALTERNATIVES ---
@@ -177,7 +171,6 @@ class ScanService {
 
     return ScanResult(
       productName: name,
-      // 🚀 FINAL STATUS:
       // Safe if: No Warnings AND Data isn't completely missing
       isSafe: warnings.isEmpty && !isMissingData,
       isMissingData: isMissingData,
@@ -196,7 +189,6 @@ class ScanService {
     );
   }
 
-  // 🛠️ HELPER (Kept strict for alternatives)
   String? _getSafetyReason(
     Map<String, dynamic> item,
     List<String> conditions,
@@ -225,7 +217,6 @@ class ScanService {
         bool failed = false;
         rule.nutrientLimits.forEach((key, limit) {
           double? val = nutrients[key];
-          // Alternatives: We prefer known data, so we fail if null
           if (val == null)
             failed = true;
           else if (val > limit)
