@@ -106,7 +106,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
 
     // LOGIC FOR 3 STATES
     if (result.isMissingData) {
-      // 🟠 STATE 1: MISSING RELEVANT DATA (Orange)
+      // STATE 1: MISSING RELEVANT DATA (Orange)
       bgColor = Colors.orange.shade50;
       textColor = Colors.orange.shade900;
       titleText = "UNKNOWN STATUS";
@@ -136,13 +136,13 @@ class _ScannerScreenState extends State<ScannerScreen> {
         ],
       );
     } else if (result.isSafe) {
-      // 🟢 STATE 2: SAFE (Green)
+      // STATE 2: SAFE (Green)
       bgColor = Colors.green.shade50;
       textColor = Colors.green.shade800;
       titleText = "SAFE TO EAT";
       statusWidget = Container();
     } else {
-      // 🔴 STATE 3: UNSAFE (Red)
+      // STATE 3: UNSAFE (Red)
       bgColor = Colors.red.shade50;
       textColor = Colors.red.shade800;
       titleText = "AVOID THIS";
@@ -412,7 +412,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              "✅ It belongs to the same specific category.",
+              "t belongs to the same specific category.",
               style: TextStyle(fontStyle: FontStyle.italic),
             ),
             const SizedBox(height: 10),

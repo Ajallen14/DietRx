@@ -24,7 +24,7 @@ class DatabaseHelper {
     var exists = await databaseExists(path);
 
     if (!exists) {
-      print("⏳ Copying database from assets...");
+      print("Copying database from assets...");
       try {
         await Directory(dirname(path)).create(recursive: true);
         ByteData data = await rootBundle.load(
@@ -35,12 +35,12 @@ class DatabaseHelper {
           data.lengthInBytes,
         );
         await File(path).writeAsBytes(bytes, flush: true);
-        print("✅ Database copied successfully!");
+        print("Database copied successfully!");
       } catch (e) {
-        print("❌ Error copying database: $e");
+        print("Error copying database: $e");
       }
     } else {
-      print("✅ Database already exists at: $path");
+      print("Database already exists at: $path");
     }
 
     return await openDatabase(path, readOnly: true);
@@ -76,7 +76,7 @@ class DatabaseHelper {
     String mostSpecificTag = tags.last.trim();
 
     print(
-      "🔍 Searching for alternatives with specific tag: '$mostSpecificTag'",
+      "Searching for alternatives with specific tag: '$mostSpecificTag'",
     );
 
     // 3. Query the DB for products that share this EXACT specific tag

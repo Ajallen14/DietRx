@@ -86,7 +86,6 @@ class ScanService {
     }
 
     // D. ANALYZE HEALTH RULES
-
     for (var condition in userConditions) {
       if (diseaseRules.containsKey(condition)) {
         final rule = diseaseRules[condition]!;
