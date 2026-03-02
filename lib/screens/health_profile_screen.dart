@@ -42,11 +42,9 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
   final List<String> _selectedAllergies = [];
   bool _isLoading = false;
 
-  // 🚀 Added specific loading states for the "+" buttons
   bool _isAddingCondition = false;
   bool _isAddingAllergy = false;
 
-  // Controllers for the two "Add Other" fields
   final TextEditingController _otherConditionController =
       TextEditingController();
   final TextEditingController _otherAllergyController = TextEditingController();
@@ -58,19 +56,17 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
     super.dispose();
   }
 
-  // --- LOGIC: Add a new custom chip (🚀 Updated for Gemini AI) ---
   Future<void> _addCustomItem(
     TextEditingController controller,
     List<String> mainList,
     List<String> selectedList,
-    bool isAllergy, // 🚀 Added to know how to prompt Gemini
+    bool isAllergy, 
   ) async {
     final text = controller.text.trim();
 
     // Don't add empty or duplicate items
     if (text.isEmpty || mainList.contains(text)) return;
 
-    // 🚀 Start loading spinner
     setState(() {
       if (isAllergy) {
         _isAddingAllergy = true;
@@ -79,10 +75,10 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
       }
     });
 
-    FocusScope.of(context).unfocus(); // Close keyboard
+    FocusScope.of(context).unfocus();
 
     try {
-      // 🚀 Call Gemini and save to Firebase Dynamic_Rules
+      // Call Gemini and save to Firebase Dynamic_Rules
       await _profileService.addCustomCondition(text, isAllergy: isAllergy);
 
       setState(() {
@@ -94,7 +90,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("✅ Rules for $text generated!"),
+            content: Text("Rules for $text generated!"),
             backgroundColor: Colors.green,
           ),
         );
@@ -103,7 +99,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("❌ Error: Could not generate rules."),
+            content: Text("Error: Could not generate rules."),
             backgroundColor: Colors.red,
           ),
         );
@@ -223,7 +219,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
 
             const SizedBox(height: 15),
 
-            // Add other Condition (🚀 Updated parameters)
+            // Add other Condition
             _buildAddOtherRow(
               controller: _otherConditionController,
               label: "Add other condition...",
@@ -232,7 +228,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
                 _otherConditionController,
                 _allConditions,
                 _selectedConditions,
-                false, // isAllergy = false
+                false,
               ),
             ),
 
@@ -265,7 +261,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
 
             const SizedBox(height: 15),
 
-            // Add other Allergy (🚀 Updated parameters)
+            // Add other Allergy
             _buildAddOtherRow(
               controller: _otherAllergyController,
               label: "Add other allergy...",
