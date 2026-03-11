@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:lottie/lottie.dart';
 import '../services/dynamic_rule_service.dart';
 import '../services/scan_service.dart';
 import 'recipe_result_screen.dart';
@@ -31,17 +32,16 @@ class _RecipeScreenState extends State<RecipeScreen> {
 
       setState(() => _isProcessing = true);
 
-      // 1. Send Image 
-      final extractedData = await DynamicRuleService.analyzeRecipe(
-        imageFile: File(image.path),
-      );
+      Map<String, dynamic>? extractedData;
+      await Future.wait([
+        DynamicRuleService.analyzeRecipe(imageFile: File(image.path))
+            .then((res) => extractedData = res),
+        Future.delayed(const Duration(seconds: 2)),
+      ]);
 
       if (extractedData != null && mounted) {
-        // 2. Run against Health Profile
-        final evaluation = await ScanService().evaluateRecipe(extractedData);
+        final evaluation = await ScanService().evaluateRecipe(extractedData!);
         setState(() => _isProcessing = false);
-
-        // 3. Navigate to the Result Screen
         _showResultScreen(evaluation);
       } else {
         setState(() => _isProcessing = false);
@@ -71,17 +71,16 @@ class _RecipeScreenState extends State<RecipeScreen> {
     setState(() => _isProcessing = true);
 
     try {
-      // 1. Send Text 
-      final extractedData = await DynamicRuleService.analyzeRecipe(
-        recipeText: _recipeTextController.text,
-      );
+      Map<String, dynamic>? extractedData;
+      await Future.wait([
+        DynamicRuleService.analyzeRecipe(recipeText: _recipeTextController.text)
+            .then((res) => extractedData = res),
+        Future.delayed(const Duration(seconds: 2)),
+      ]);
 
       if (extractedData != null && mounted) {
-        // 2. Run against Health Profile
-        final evaluation = await ScanService().evaluateRecipe(extractedData);
+        final evaluation = await ScanService().evaluateRecipe(extractedData!);
         setState(() => _isProcessing = false);
-
-        // 3. Navigate to the Result Screen
         _showResultScreen(evaluation);
       } else {
         setState(() => _isProcessing = false);
@@ -97,7 +96,6 @@ class _RecipeScreenState extends State<RecipeScreen> {
     }
   }
 
-  // --- NEW NAVIGATION LOGIC ---
   void _showResultScreen(Map<String, dynamic> evaluation) {
     Navigator.push(
       context,
@@ -107,7 +105,6 @@ class _RecipeScreenState extends State<RecipeScreen> {
     );
   }
 
-  // --- UI ---
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,13 +126,30 @@ class _RecipeScreenState extends State<RecipeScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const CircularProgressIndicator(color: Color(0xFF557B3E)),
-                  const SizedBox(height: 20),
+                  Lottie.asset(
+                    'assets/animations/spoon_loading.json',
+                    width: 110,
+                    height: 110,
+                    fit: BoxFit.contain,
+                    delegates: LottieDelegates(
+                      values: [
+                        ValueDelegate.colorFilter(
+                          const ['**'],
+                          value: const ColorFilter.mode(
+                            Color(0xFF8CC63F),
+                            BlendMode.srcATop,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 15),
                   Text(
                     "Analyzing recipe...",
                     style: GoogleFonts.poppins(
                       color: Colors.black54,
                       fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -146,7 +160,6 @@ class _RecipeScreenState extends State<RecipeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // --- OPTION 1: SCAN IMAGE ---
                   Text(
                     "Scan a Cookbook or Menu",
                     style: GoogleFonts.poppins(
@@ -188,7 +201,6 @@ class _RecipeScreenState extends State<RecipeScreen> {
                   const Divider(color: Colors.black12, thickness: 1),
                   const SizedBox(height: 40),
 
-                  // --- OPTION 2: PASTE TEXT ---
                   Text(
                     "Paste a Recipe",
                     style: GoogleFonts.poppins(
@@ -199,7 +211,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    "Found a recipe online? Paste the text or ingredients list here.",
+                    "Paste the text or ingredients list here.",
                     style: GoogleFonts.poppins(
                       color: Colors.black54,
                       fontSize: 14,
@@ -220,9 +232,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                       decoration: InputDecoration(
                         hintText:
                             "e.g., 2 cups flour\n1 tsp baking soda\n1/2 cup sugar...",
-                        hintStyle: const TextStyle(
-                          color: Colors.grey,
-                        ),
+                        hintStyle: const TextStyle(color: Colors.grey),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.all(16),
                       ),
@@ -245,16 +255,14 @@ class _RecipeScreenState extends State<RecipeScreen> {
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF557B3E), 
+                        backgroundColor: const Color(0xFF557B3E),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(
-                    height: 80,
-                  ),
+                  const SizedBox(height: 80),
                 ],
               ),
             ),
