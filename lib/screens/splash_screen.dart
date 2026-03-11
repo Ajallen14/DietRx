@@ -59,7 +59,6 @@ class _DietRxSplashScreenState extends State<DietRxSplashScreen>
 
     // 4. SMART NAVIGATION LOGIC
     if (mounted) {
-      // Check if there is an active user session right now
       final user = FirebaseAuth.instance.currentUser;
 
       if (user != null) {
