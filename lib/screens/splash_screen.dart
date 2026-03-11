@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../main.dart';
+import 'onboarding_screen.dart';
 
 class DietRxSplashScreen extends StatefulWidget {
   const DietRxSplashScreen({super.key});
@@ -55,12 +57,22 @@ class _DietRxSplashScreenState extends State<DietRxSplashScreen>
 
     await Future.delayed(const Duration(seconds: 2));
 
-    // 4. Navigate to AuthWrapper (Checks login status)
+    // 4. SMART NAVIGATION LOGIC
     if (mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const AuthWrapper()),
-      );
+      // Check if there is an active user session right now
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const AuthWrapper()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+        );
+      }
     }
   }
 
