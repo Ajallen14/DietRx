@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../services/database_helper.dart';
 import 'scanner_screen.dart';
 import 'login_screen.dart';
+import '../widgets/custom_loading.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -33,10 +34,16 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // Fetch history from Database
+// Fetch history from Database
   Future<void> _loadHistory() async {
     try {
-      final data = await DatabaseHelper().getScanHistory();
+      List<Map<String, dynamic>> data = [];
+      
+      await Future.wait([
+        DatabaseHelper().getScanHistory().then((res) => data = res),
+        Future.delayed(const Duration(seconds: 2)),
+      ]);
+
       if (mounted) {
         setState(() {
           _history = data;
@@ -112,8 +119,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
       // --- SCAN HISTORY ---
       body: _isLoadingHistory
-          ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFF1B4D3E)),
+          ? const CustomLoading(
+              message: "Loading Scans...", 
+              textColor: Colors.white,
             )
           : _history.isEmpty
           ? Center(

@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 // import 'package:firebase_storage/firebase_storage.dart'; // <-- Uncomment this later if you add Firebase Storage
 import '../services/profile_service.dart';
 import '../services/database_helper.dart';
+import '../widgets/custom_loading.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -48,40 +49,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _loadProfileData() async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        _userName = user.displayName ?? "User";
-        _userEmail = user.email ?? "";
-        _photoUrl = user.photoURL;
+      await Future.wait([
+        () async {
+          final user = FirebaseAuth.instance.currentUser;
+          if (user != null) {
+            _userName = user.displayName ?? "User";
+            _userEmail = user.email ?? "";
+            _photoUrl = user.photoURL;
 
-        final doc = await FirebaseFirestore.instance
-            .collection('Health_Profiles')
-            .doc(user.uid)
-            .get();
+            final doc = await FirebaseFirestore.instance
+                .collection('Health_Profiles')
+                .doc(user.uid)
+                .get();
 
-        if (doc.exists && doc.data() != null) {
-          final data = doc.data()!;
-          _conditions = List<String>.from(data['conditions'] ?? []);
-          _allergies = List<String>.from(data['allergies'] ?? []);
-        }
-      }
+            if (doc.exists && doc.data() != null) {
+              final data = doc.data()!;
+              _conditions = List<String>.from(data['conditions'] ?? []);
+              _allergies = List<String>.from(data['allergies'] ?? []);
+            }
+          }
 
-      final dbHelper = DatabaseHelper();
-      final history = await dbHelper.getScanHistory();
+          final dbHelper = DatabaseHelper();
+          final history = await dbHelper.getScanHistory();
 
-      int safeCount = 0;
-      int unsafeCount = 0;
+          int safeCount = 0;
+          int unsafeCount = 0;
 
-      for (var item in history) {
-        if (item['status'] == 'safe') safeCount++;
-        if (item['status'] == 'unsafe') unsafeCount++;
-      }
+          for (var item in history) {
+            if (item['status'] == 'safe') safeCount++;
+            if (item['status'] == 'unsafe') unsafeCount++;
+          }
 
-      if (mounted) {
-        setState(() {
           _totalScanned = history.length;
           _safeItems = safeCount;
           _notSafeItems = unsafeCount;
+        }(),
+        Future.delayed(const Duration(seconds: 2)),
+      ]);
+
+      if (mounted) {
+        setState(() {
           _isLoading = false;
         });
       }
@@ -406,8 +413,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return Scaffold(
         backgroundColor: Colors.white,
         appBar: _buildStaticAppBar(),
-        body: const Center(
-          child: CircularProgressIndicator(color: Color(0xFF557B3E)),
+        body: const CustomLoading(
+          message: "Fetching your profile...",
+          textColor: Color(0xFF557B3E),
         ),
       );
     }

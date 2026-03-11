@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
+import 'widgets/custom_loading.dart';
 import 'screens/health_profile_screen.dart';
 
 void main() async {
@@ -42,7 +43,8 @@ class AuthWrapper extends StatelessWidget {
         // Waiting for Auth...
         if (authSnapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+            backgroundColor: Colors.white,
+            body: CustomLoading(message: "Preparing DietRx...", textColor: Color(0xFF8CC63F)),
           );
         }
 
@@ -60,10 +62,8 @@ class AuthWrapper extends StatelessWidget {
               // Waiting for Database (Loading screen)
               if (dbSnapshot.connectionState == ConnectionState.waiting) {
                 return const Scaffold(
-                  backgroundColor: Color(0xFF1B4D3E),
-                  body: Center(
-                    child: CircularProgressIndicator(color: Colors.white),
-                  ),
+                  backgroundColor: Colors.white,
+                  body: CustomLoading(message: "Loading Profile...", textColor: Color(0xFF8CC63F)),
                 );
               }
 

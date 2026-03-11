@@ -7,6 +7,7 @@ import '../services/dynamic_rule_service.dart';
 import 'result_screen.dart';
 import '../services/scan_service.dart';
 import '../services/database_helper.dart';
+import '../widgets/custom_loading.dart';
 
 class IngredientScannerScreen extends StatefulWidget {
   final String scannedBarcode;
@@ -65,9 +66,12 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
         _extractedData = null;
       });
 
-      final data = await DynamicRuleService.analyzeProductLabel(
-        File(image.path),
-      );
+      Map<String, dynamic>? data;
+
+      await Future.wait([
+        DynamicRuleService.analyzeProductLabel(File(image.path)).then((res) => data = res),
+        Future.delayed(const Duration(seconds: 2)),
+      ]);
 
       if (mounted) {
         setState(() {
@@ -183,16 +187,9 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
       ),
       body: Center(
         child: _isProcessing
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const CircularProgressIndicator(color: Color(0xFF8CC63F)),
-                  const SizedBox(height: 20),
-                  Text(
-                    "Analyzing the label...",
-                    style: GoogleFonts.poppins(color: Colors.white70),
-                  ),
-                ],
+            ? const CustomLoading(
+                message: "Analyzing the label...",
+                textColor: Colors.white,
               )
             : _extractedData != null
             ? _buildResultView()
