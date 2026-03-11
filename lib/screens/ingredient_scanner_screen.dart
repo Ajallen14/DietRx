@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lottie/lottie.dart';
 import '../services/dynamic_rule_service.dart';
 import 'result_screen.dart';
 import '../services/scan_service.dart';
 import '../services/database_helper.dart';
-import '../widgets/custom_loading.dart';
 
 class IngredientScannerScreen extends StatefulWidget {
   final String scannedBarcode;
@@ -191,9 +191,25 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
       ),
       body: Center(
         child: _isProcessing
-            ? const CustomLoading(
-                message: "Analyzing the label...",
-                textColor: Color(0xFF557B3E),
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Lottie.asset(
+                    'assets/animations/walking_avocado.json',
+                    width: 180,
+                    height: 180,
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(height: 15),
+                  Text(
+                    "Analyzing the label...",
+                    style: GoogleFonts.poppins(
+                      color: const Color(0xFF557B3E),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               )
             : _extractedData != null
             ? _buildResultView()

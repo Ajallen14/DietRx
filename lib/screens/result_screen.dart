@@ -342,11 +342,12 @@ class _ResultScreenState extends State<ResultScreen>
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => IngredientScannerScreen(
-                                            scannedBarcode:
-                                                widget.result.barcode ??
-                                                "UNKNOWN_BARCODE",
-                                          ),
+                                          builder: (context) =>
+                                              IngredientScannerScreen(
+                                                scannedBarcode:
+                                                    widget.result.barcode ??
+                                                    "UNKNOWN_BARCODE",
+                                              ),
                                         ),
                                       );
                                     },
