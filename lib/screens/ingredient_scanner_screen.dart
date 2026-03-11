@@ -67,9 +67,10 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
       });
 
       Map<String, dynamic>? data;
-
       await Future.wait([
-        DynamicRuleService.analyzeProductLabel(File(image.path)).then((res) => data = res),
+        DynamicRuleService.analyzeProductLabel(
+          File(image.path),
+        ).then((res) => data = res),
         Future.delayed(const Duration(seconds: 2)),
       ]);
 
@@ -176,20 +177,23 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
           "Add Missing Product",
-          style: GoogleFonts.poppins(color: Colors.white),
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
         ),
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFF557B3E),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Center(
         child: _isProcessing
             ? const CustomLoading(
                 message: "Analyzing the label...",
-                textColor: Colors.white,
+                textColor: Color(0xFF557B3E),
               )
             : _extractedData != null
             ? _buildResultView()
@@ -199,7 +203,7 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
                   const Icon(
                     Icons.document_scanner,
                     size: 80,
-                    color: Colors.white54,
+                    color: Color(0xFF557B3E),
                   ),
                   const SizedBox(height: 20),
                   Padding(
@@ -208,7 +212,7 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
                       "Take a clear photo of the Ingredients list and Nutritional table.",
                       textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(
-                        color: Colors.white70,
+                        color: Colors.black87,
                         fontSize: 16,
                       ),
                     ),
@@ -216,19 +220,22 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
                   const SizedBox(height: 40),
                   ElevatedButton.icon(
                     onPressed: _scanLabel,
-                    icon: const Icon(Icons.camera_alt, color: Colors.black),
+                    icon: const Icon(Icons.camera_alt, color: Colors.white),
                     label: Text(
                       "Open Camera",
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: Colors.white,
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF8CC63F),
+                      backgroundColor: const Color(0xFF557B3E),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 30,
                         vertical: 15,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
                       ),
                     ),
                   ),
@@ -252,7 +259,7 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
           Text(
             "Extraction Successful!",
             style: GoogleFonts.poppins(
-              color: Colors.green,
+              color: const Color(0xFF557B3E),
               fontSize: 22,
               fontWeight: FontWeight.bold,
             ),
@@ -260,31 +267,35 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
           const SizedBox(height: 20),
           TextField(
             controller: _nameController,
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.black87),
             decoration: InputDecoration(
               labelText: "What is the product's name?",
-              labelStyle: const TextStyle(color: Colors.white54),
+              labelStyle: const TextStyle(color: Colors.black54),
               enabledBorder: OutlineInputBorder(
-                borderSide: const BorderSide(color: Colors.white24),
+                borderSide: const BorderSide(color: Colors.black12),
                 borderRadius: BorderRadius.circular(15),
               ),
               focusedBorder: OutlineInputBorder(
-                borderSide: const BorderSide(color: Color(0xFF8CC63F)),
+                borderSide: const BorderSide(
+                  color: Color(0xFF8CC63F),
+                  width: 2,
+                ),
                 borderRadius: BorderRadius.circular(15),
               ),
-              prefixIcon: const Icon(Icons.fastfood, color: Colors.white54),
+              prefixIcon: const Icon(Icons.fastfood, color: Colors.black54),
             ),
           ),
           const SizedBox(height: 20),
           Expanded(
             child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     "Ingredients Found:",
                     style: GoogleFonts.poppins(
-                      color: Colors.white,
+                      color: Colors.black87,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
@@ -295,51 +306,76 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
                     runSpacing: 8,
                     children: ingredients
                         .map(
-                          (ing) => Chip(
-                            label: Text(
-                              ing,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.black,
+                          (ing) => Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF4F9DD),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: const Color(0xFF8CC63F),
+                                width: 1,
                               ),
                             ),
-                            backgroundColor: Colors.white70,
-                            padding: EdgeInsets.zero,
+                            child: Text(
+                              ing,
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black87,
+                              ),
+                            ),
                           ),
                         )
                         .toList(),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 30),
                   Text(
                     "Nutrition Found:",
                     style: GoogleFonts.poppins(
-                      color: Colors.white,
+                      color: Colors.black87,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
                   ),
                   const SizedBox(height: 10),
-                  ...nutrition.entries.map(
-                    (e) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            e.key.toUpperCase(),
-                            style: GoogleFonts.poppins(color: Colors.white54),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(color: Colors.black12),
+                    ),
+                    child: Column(
+                      children: nutrition.entries.map((e) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                e.key.toUpperCase(),
+                                style: GoogleFonts.poppins(
+                                  color: Colors.black54,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                e.value.toString(),
+                                style: GoogleFonts.poppins(
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
-                          Text(
-                            e.value.toString(),
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
+                        );
+                      }).toList(),
                     ),
                   ),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -350,7 +386,7 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
             child: ElevatedButton(
               onPressed: _isSaving ? null : _saveToDatabase,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF8CC63F),
+                backgroundColor: const Color(0xFF557B3E),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
                 ),
@@ -360,14 +396,14 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(
-                        color: Colors.black,
+                        color: Colors.white,
                         strokeWidth: 2,
                       ),
                     )
                   : Text(
                       "Save to Database",
                       style: GoogleFonts.poppins(
-                        color: Colors.black,
+                        color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),

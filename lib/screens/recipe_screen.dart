@@ -111,16 +111,16 @@ class _RecipeScreenState extends State<RecipeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, 
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
           "Recipe Analyzer",
           style: GoogleFonts.poppins(
             color: Colors.white,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFF557B3E),
         elevation: 0,
         centerTitle: true,
       ),
@@ -129,12 +129,12 @@ class _RecipeScreenState extends State<RecipeScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const CircularProgressIndicator(color: Color(0xFF8CC63F)),
+                  const CircularProgressIndicator(color: Color(0xFF557B3E)),
                   const SizedBox(height: 20),
                   Text(
                     "Analyzing recipe...",
                     style: GoogleFonts.poppins(
-                      color: Colors.white70,
+                      color: Colors.black54,
                       fontSize: 16,
                     ),
                   ),
@@ -150,7 +150,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                   Text(
                     "Scan a Cookbook or Menu",
                     style: GoogleFonts.poppins(
-                      color: Colors.white,
+                      color: Colors.black87,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -159,7 +159,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                   Text(
                     "Take a photo of a recipe or upload a screenshot to extract ingredients instantly.",
                     style: GoogleFonts.poppins(
-                      color: Colors.white54,
+                      color: Colors.black54,
                       fontSize: 14,
                     ),
                   ),
@@ -185,14 +185,14 @@ class _RecipeScreenState extends State<RecipeScreen> {
                   ),
 
                   const SizedBox(height: 40),
-                  const Divider(color: Colors.white24, thickness: 1),
+                  const Divider(color: Colors.black12, thickness: 1),
                   const SizedBox(height: 40),
 
                   // --- OPTION 2: PASTE TEXT ---
                   Text(
                     "Paste a Recipe",
                     style: GoogleFonts.poppins(
-                      color: Colors.white,
+                      color: Colors.black87,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -201,7 +201,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                   Text(
                     "Found a recipe online? Paste the text or ingredients list here.",
                     style: GoogleFonts.poppins(
-                      color: Colors.white54,
+                      color: Colors.black54,
                       fontSize: 14,
                     ),
                   ),
@@ -209,19 +209,19 @@ class _RecipeScreenState extends State<RecipeScreen> {
 
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
+                      color: Colors.grey.shade100,
                       borderRadius: BorderRadius.circular(15),
-                      border: Border.all(color: Colors.white24),
+                      border: Border.all(color: Colors.black12),
                     ),
                     child: TextField(
                       controller: _recipeTextController,
                       maxLines: 8,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.black87),
                       decoration: InputDecoration(
                         hintText:
                             "e.g., 2 cups flour\n1 tsp baking soda\n1/2 cup sugar...",
-                        hintStyle: TextStyle(
-                          color: Colors.white.withOpacity(0.3),
+                        hintStyle: const TextStyle(
+                          color: Colors.grey,
                         ),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.all(16),
@@ -235,17 +235,17 @@ class _RecipeScreenState extends State<RecipeScreen> {
                     height: 55,
                     child: ElevatedButton.icon(
                       onPressed: _processText,
-                      icon: const Icon(Icons.analytics, color: Colors.black),
+                      icon: const Icon(Icons.analytics, color: Colors.white),
                       label: Text(
                         "Analyze Recipe",
                         style: GoogleFonts.poppins(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF8CC63F),
+                        backgroundColor: const Color(0xFF557B3E), 
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
@@ -272,19 +272,19 @@ class _RecipeScreenState extends State<RecipeScreen> {
       child: Container(
         height: 100,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: const Color(0xFF8CC63F).withOpacity(0.5)),
+          border: Border.all(color: const Color(0xFF8CC63F), width: 1.5),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: const Color(0xFF8CC63F), size: 36),
+            Icon(icon, color: const Color(0xFF557B3E), size: 36),
             const SizedBox(height: 8),
             Text(
               label,
               style: GoogleFonts.poppins(
-                color: Colors.white,
+                color: Colors.black87,
                 fontWeight: FontWeight.w600,
               ),
             ),
