@@ -276,7 +276,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               content: TextField(
                 controller: controller,
                 decoration: InputDecoration(
-                  hintText: "e.g., ${isAllergy ? 'Dairy' : 'Diabetes'}",
+                  hintText: "e.g. ${isAllergy ? 'Dairy' : 'Diabetes'}",
+                  hintStyle: const TextStyle(
+                    color: Color.fromARGB(255, 141, 138, 138),
+                  ),
                   filled: true,
                   fillColor: Colors.grey.shade100,
                   border: OutlineInputBorder(
@@ -292,7 +295,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       : () => Navigator.pop(dialogContext),
                   child: const Text(
                     "Cancel",
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(color: Colors.black87),
                   ),
                 ),
                 ElevatedButton(

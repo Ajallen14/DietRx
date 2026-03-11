@@ -34,8 +34,9 @@ class _RecipeScreenState extends State<RecipeScreen> {
 
       Map<String, dynamic>? extractedData;
       await Future.wait([
-        DynamicRuleService.analyzeRecipe(imageFile: File(image.path))
-            .then((res) => extractedData = res),
+        DynamicRuleService.analyzeRecipe(
+          imageFile: File(image.path),
+        ).then((res) => extractedData = res),
         Future.delayed(const Duration(seconds: 2)),
       ]);
 
@@ -73,8 +74,9 @@ class _RecipeScreenState extends State<RecipeScreen> {
     try {
       Map<String, dynamic>? extractedData;
       await Future.wait([
-        DynamicRuleService.analyzeRecipe(recipeText: _recipeTextController.text)
-            .then((res) => extractedData = res),
+        DynamicRuleService.analyzeRecipe(
+          recipeText: _recipeTextController.text,
+        ).then((res) => extractedData = res),
         Future.delayed(const Duration(seconds: 2)),
       ]);
 
@@ -217,7 +219,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                       fontSize: 14,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
 
                   Container(
                     decoration: BoxDecoration(
