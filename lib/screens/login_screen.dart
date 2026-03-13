@@ -105,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
           SingleChildScrollView(
             child: Column(
               children: [
-                SizedBox(height: size.height * 0.15),
+                SizedBox(height: size.height * 0.12),
                 Text(
                   "Welcome!",
                   style: GoogleFonts.poppins(
@@ -233,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Expanded(child: Divider(color: Colors.white24)),
                 ],
               ),
-              const SizedBox(height: 20), 
+              const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 height: 55,
