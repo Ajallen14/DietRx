@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
-// import 'package:firebase_storage/firebase_storage.dart'; // <-- Uncomment this later if you add Firebase Storage
+import '../main.dart';
 import '../services/profile_service.dart';
 import '../services/database_helper.dart';
 import '../widgets/custom_loading.dart';
@@ -17,11 +17,19 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  // --- UI CONSTANTS ---
+  // --- UI CONSTANTS & DYNAMIC THEME COLORS ---
   final Color _headerGreen = const Color(0xFF557B3E);
-  final Color _lightGreenBg = const Color(0xFFF4F9DD);
   final Color _borderGreen = const Color(0xFF8CC63F);
-  final Color _textDark = Colors.black87;
+
+  // Dynamic color getters
+  bool get isDark => MyApp.themeNotifier.value == ThemeMode.dark;
+  Color get bgColor => isDark ? const Color(0xFF121212) : Colors.white;
+  Color get cardColor => isDark ? const Color(0xFF1E1E1E) : Colors.white;
+  Color get textPrimary => isDark ? Colors.white : Colors.black87;
+  Color get textSecondary => isDark ? Colors.white70 : Colors.black54;
+  Color get pillBgColor =>
+      isDark ? const Color(0xFF2A3D1E) : const Color(0xFFF4F9DD);
+  Color get dividerColor => isDark ? Colors.white12 : Colors.black12;
 
   // --- STATE VARIABLES ---
   final ProfileService _profileService = ProfileService();
@@ -30,7 +38,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _userEmail = "";
   String? _photoUrl;
 
-  // variables for Image Picking
   File? _localImageFile;
   bool _isUploadingPhoto = false;
 
@@ -113,6 +120,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
             return AlertDialog(
+              backgroundColor: cardColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -126,10 +134,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               content: TextField(
                 controller: nameController,
+                style: TextStyle(color: textPrimary),
                 decoration: InputDecoration(
                   hintText: "Enter your name",
+                  hintStyle: TextStyle(color: textSecondary),
                   filled: true,
-                  fillColor: Colors.grey.shade100,
+                  fillColor: isDark ? Colors.black45 : Colors.grey.shade100,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
                     borderSide: BorderSide.none,
@@ -141,10 +151,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onPressed: isSaving
                       ? null
                       : () => Navigator.pop(dialogContext),
-                  child: const Text(
-                    "Cancel",
-                    style: TextStyle(color: Colors.grey),
-                  ),
+                  child: Text("Cancel", style: TextStyle(color: textSecondary)),
                 ),
                 ElevatedButton(
                   onPressed: isSaving
@@ -215,21 +222,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (image == null) return;
 
       setState(() {
-        _localImageFile = File(image.path); // Update UI instantly
+        _localImageFile = File(image.path);
         _isUploadingPhoto = true;
       });
-
-      /* // TODO: Uncomment this block if you have Firebase Storage configured!
-      // This permanently saves the image to their Google Account Profile
-      
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final storageRef = FirebaseStorage.instance.ref().child('user_profiles/${user.uid}.jpg');
-        await storageRef.putFile(_localImageFile!);
-        final downloadUrl = await storageRef.getDownloadURL();
-        await user.updatePhotoURL(downloadUrl);
-      }
-      */
 
       setState(() => _isUploadingPhoto = false);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -262,6 +257,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
             return AlertDialog(
+              backgroundColor: cardColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -275,13 +271,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               content: TextField(
                 controller: controller,
+                style: TextStyle(color: textPrimary),
                 decoration: InputDecoration(
                   hintText: "e.g. ${isAllergy ? 'Dairy' : 'Diabetes'}",
-                  hintStyle: const TextStyle(
-                    color: Color.fromARGB(255, 141, 138, 138),
-                  ),
+                  hintStyle: TextStyle(color: textSecondary),
                   filled: true,
-                  fillColor: Colors.grey.shade100,
+                  fillColor: isDark ? Colors.black45 : Colors.grey.shade100,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
                     borderSide: BorderSide.none,
@@ -293,10 +288,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onPressed: isAdding
                       ? null
                       : () => Navigator.pop(dialogContext),
-                  child: const Text(
-                    "Cancel",
-                    style: TextStyle(color: Colors.black87),
-                  ),
+                  child: Text("Cancel", style: TextStyle(color: textPrimary)),
                 ),
                 ElevatedButton(
                   onPressed: isAdding
@@ -414,7 +406,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: bgColor,
         appBar: _buildStaticAppBar(),
         body: const CustomLoading(
           message: "Fetching your profile...",
@@ -424,7 +416,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: bgColor,
       appBar: _buildStaticAppBar(),
       body: Stack(
         children: [
@@ -447,7 +439,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Container(
                         height: 90,
                         width: double.infinity,
-                        color: Colors.white,
+                        color: bgColor,
                       ),
                     ),
                     Container(
@@ -464,17 +456,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: cardColor,
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Colors.black.withOpacity(0.05),
-                            width: 1.5,
-                          ),
-                          boxShadow: const [
+                          border: Border.all(color: dividerColor, width: 1.5),
+                          boxShadow: [
                             BoxShadow(
-                              color: Color(0xFFD1D5DB),
-                              blurRadius: 0,
-                              offset: Offset(0, 8),
+                              color: isDark
+                                  ? Colors.black45
+                                  : const Color(0xFFD1D5DB),
+                              blurRadius: isDark ? 8 : 0,
+                              offset: const Offset(0, 8),
                             ),
                           ],
                         ),
@@ -484,7 +475,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         child: Row(
                           children: [
-                            // Clickable Avatar with Camera Icon
                             GestureDetector(
                               onTap: _pickProfilePhoto,
                               child: Stack(
@@ -497,7 +487,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       color: const Color(0xFFB1C9D6),
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: Colors.white,
+                                        color: cardColor,
                                         width: 3,
                                       ),
                                       boxShadow: [
@@ -540,7 +530,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       color: _headerGreen,
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: Colors.white,
+                                        color: cardColor,
                                         width: 2,
                                       ),
                                     ),
@@ -558,7 +548,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // Clickable Name with Edit Icon
                                   InkWell(
                                     onTap: _showEditNameDialog,
                                     borderRadius: BorderRadius.circular(5),
@@ -571,17 +560,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                             style: GoogleFonts.poppins(
-                                              color: _textDark,
+                                              color: textPrimary,
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                         ),
                                         const SizedBox(width: 6),
-                                        const Icon(
+                                        Icon(
                                           Icons.edit,
                                           size: 16,
-                                          color: Colors.grey,
+                                          color: textSecondary,
                                         ),
                                       ],
                                     ),
@@ -591,7 +580,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: GoogleFonts.poppins(
-                                      color: Colors.black54,
+                                      color: textSecondary,
                                       fontSize: 12,
                                     ),
                                   ),
@@ -606,12 +595,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
 
                 Container(
-                  color: Colors.white,
+                  color: bgColor,
                   width: double.infinity,
                   child: Column(
                     children: [
                       const SizedBox(height: 5),
-
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 30),
                         child: Text(
@@ -620,11 +608,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: _textDark,
+                            color: textPrimary,
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 25),
 
                       Padding(
@@ -654,7 +641,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ],
                         ),
                       ),
-
                       const SizedBox(height: 30),
 
                       Padding(
@@ -665,16 +651,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             _buildSectionHeader(
                               "🌿",
                               "Diagnosed health conditions",
-                              () {
-                                _showAddItemDialog(false);
-                              },
+                              () => _showAddItemDialog(false),
                             ),
                             const SizedBox(height: 15),
                             _conditions.isEmpty
                                 ? Text(
                                     "No conditions added yet.",
                                     style: GoogleFonts.poppins(
-                                      color: Colors.black54,
+                                      color: textSecondary,
                                       fontStyle: FontStyle.italic,
                                     ),
                                   )
@@ -688,14 +672,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         .toList(),
                                   ),
                             const SizedBox(height: 20),
-                            const Divider(
-                              color: Colors.black12,
-                              thickness: 1.5,
-                            ),
+                            Divider(color: dividerColor, thickness: 1.5),
                           ],
                         ),
                       ),
-
                       const SizedBox(height: 15),
 
                       Padding(
@@ -703,15 +683,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildSectionHeader("🌿", "Food allergies", () {
-                              _showAddItemDialog(true);
-                            }),
+                            _buildSectionHeader(
+                              "🌿",
+                              "Food allergies",
+                              () => _showAddItemDialog(true),
+                            ),
                             const SizedBox(height: 15),
                             _allergies.isEmpty
                                 ? Text(
                                     "No allergies added yet.",
                                     style: GoogleFonts.poppins(
-                                      color: Colors.black54,
+                                      color: textSecondary,
                                       fontStyle: FontStyle.italic,
                                     ),
                                   )
@@ -723,21 +705,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         .toList(),
                                   ),
                             const SizedBox(height: 20),
-                            const Divider(
-                              color: Colors.black12,
-                              thickness: 1.5,
-                            ),
+                            Divider(color: dividerColor, thickness: 1.5),
                           ],
                         ),
                       ),
-
                       const SizedBox(height: 15),
 
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24),
                         child: Column(
                           children: [
+                            _buildActionButton(
+                              icon: isDark ? Icons.light_mode : Icons.dark_mode,
+                              label: isDark
+                                  ? "Switch to Light Mode"
+                                  : "Switch to Dark Mode",
+                              color: _headerGreen,
+                              onTap: () {
+                                setState(() {
+                                  MyApp.themeNotifier.value = isDark
+                                      ? ThemeMode.light
+                                      : ThemeMode.dark;
+                                });
+                              },
+                            ),
                             const SizedBox(height: 15),
+
                             _buildActionButton(
                               icon: Icons.logout,
                               label: "Log Out",
@@ -765,7 +758,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(15),
         border: Border.all(color: _borderGreen, width: 1.5),
       ),
@@ -774,12 +767,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.black12),
+              border: Border.all(color: dividerColor),
               borderRadius: BorderRadius.circular(5),
             ),
             child: Text(
               number,
               style: GoogleFonts.poppins(
+                color: textPrimary,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -789,7 +783,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Text(
             label,
             textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(fontSize: 12, color: _textDark),
+            style: GoogleFonts.poppins(fontSize: 12, color: textPrimary),
           ),
         ],
       ),
@@ -807,7 +801,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             style: GoogleFonts.poppins(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: _textDark,
+              color: textPrimary,
             ),
           ),
         ),
@@ -817,9 +811,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.black87, width: 1.2),
+              border: Border.all(color: textPrimary, width: 1.2),
             ),
-            child: const Icon(Icons.add, size: 16, color: Colors.black87),
+            child: Icon(Icons.add, size: 16, color: textPrimary),
           ),
         ),
       ],
@@ -830,7 +824,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
       decoration: BoxDecoration(
-        color: _lightGreenBg,
+        color: pillBgColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: _borderGreen, width: 1),
       ),
@@ -839,7 +833,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         style: GoogleFonts.poppins(
           fontSize: 14,
           fontWeight: FontWeight.w500,
-          color: _textDark,
+          color: textPrimary,
         ),
       ),
     );
@@ -857,6 +851,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
+          color: cardColor,
           borderRadius: BorderRadius.circular(25),
           border: Border.all(color: color, width: 1.5),
         ),

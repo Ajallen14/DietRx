@@ -16,17 +16,44 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+  static final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(
+    ThemeMode.light,
+  );
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'DietRx',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1B4D3E)),
-        useMaterial3: true,
-      ),
-      home: const DietRxSplashScreen(),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeNotifier,
+      builder: (_, ThemeMode currentMode, __) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'DietRx',
+          themeMode: currentMode,
+
+          // --- LIGHT THEME ---
+          theme: ThemeData(
+            brightness: Brightness.light,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF1B4D3E),
+              brightness: Brightness.light,
+            ),
+            useMaterial3: true,
+          ),
+
+          // --- DARK THEME ---
+          darkTheme: ThemeData(
+            brightness: Brightness.dark,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF1B4D3E),
+              brightness: Brightness.dark,
+            ),
+            scaffoldBackgroundColor: const Color(0xFF121212),
+            useMaterial3: true,
+          ),
+
+          home: const DietRxSplashScreen(),
+        );
+      },
     );
   }
 }
@@ -44,7 +71,10 @@ class AuthWrapper extends StatelessWidget {
         if (authSnapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             backgroundColor: Colors.white,
-            body: CustomLoading(message: "Preparing DietRx...", textColor: Color(0xFF8CC63F)),
+            body: CustomLoading(
+              message: "Preparing DietRx...",
+              textColor: Color(0xFF8CC63F),
+            ),
           );
         }
 
@@ -63,7 +93,10 @@ class AuthWrapper extends StatelessWidget {
               if (dbSnapshot.connectionState == ConnectionState.waiting) {
                 return const Scaffold(
                   backgroundColor: Colors.white,
-                  body: CustomLoading(message: "Loading Profile...", textColor: Color(0xFF8CC63F)),
+                  body: CustomLoading(
+                    message: "Loading Profile...",
+                    textColor: Color(0xFF8CC63F),
+                  ),
                 );
               }
 
