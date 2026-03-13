@@ -80,6 +80,29 @@ class _ResultScreenState extends State<ResultScreen>
     super.dispose();
   }
 
+  // --- FALLBACK IMAGE LOGIC ---
+  Widget _getFallbackImage() {
+    if (widget.result.isMissingData) {
+      return const Icon(Icons.help_outline, size: 80, color: Color(0xFFD97706));
+    } else if (widget.result.isSafe) {
+      return Padding(
+        padding: const EdgeInsets.all(25.0),
+        child: Image.asset(
+          'assets/images/recipe_safe_icon.png',
+          fit: BoxFit.contain,
+        ),
+      );
+    } else {
+      return Padding(
+        padding: const EdgeInsets.all(25.0),
+        child: Image.asset(
+          'assets/images/recipe_unsafe_icon.png',
+          fit: BoxFit.contain,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Color primaryColor;
@@ -156,7 +179,7 @@ class _ResultScreenState extends State<ResultScreen>
             ),
           ],
 
-          // 2. SHARP WARNING ICONS (If Not Safe)
+          // 2. WARNING ICONS (If Not Safe)
           if (!widget.result.isSafe && !widget.result.isMissingData) ...[
             AnimatedWarningIcon(
               top: MediaQuery.of(context).size.height * 0.20,
@@ -253,21 +276,16 @@ class _ResultScreenState extends State<ResultScreen>
                                 ],
                               ),
                               child: ClipOval(
-                                child: widget.result.imageUrl != null
+                                child:
+                                    widget.result.imageUrl != null &&
+                                        widget.result.imageUrl!.isNotEmpty
                                     ? Image.network(
                                         widget.result.imageUrl!,
                                         fit: BoxFit.cover,
-                                        errorBuilder: (c, e, s) => const Icon(
-                                          Icons.fastfood,
-                                          size: 80,
-                                          color: Colors.grey,
-                                        ),
+                                        errorBuilder: (c, e, s) =>
+                                            _getFallbackImage(),
                                       )
-                                    : const Icon(
-                                        Icons.fastfood,
-                                        size: 80,
-                                        color: Colors.grey,
-                                      ),
+                                    : _getFallbackImage(),
                               ),
                             ),
                           );
