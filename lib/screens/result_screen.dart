@@ -81,7 +81,7 @@ class _ResultScreenState extends State<ResultScreen>
   }
 
   // --- FALLBACK IMAGE LOGIC ---
-  Widget _getFallbackImage() {
+  Widget _getFallbackImage(bool isDark) {
     if (widget.result.isMissingData) {
       return const Icon(Icons.help_outline, size: 80, color: Color(0xFFD97706));
     } else if (widget.result.isSafe) {
@@ -105,6 +105,11 @@ class _ResultScreenState extends State<ResultScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFF3F4F6);
+    final cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+    final textPrimary = isDark ? Colors.white : Colors.black87;
+
     Color primaryColor;
     Color pillColor;
     Color pillTextColor;
@@ -140,7 +145,7 @@ class _ResultScreenState extends State<ResultScreen>
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F4F6),
+      backgroundColor: bgColor,
       body: Stack(
         children: [
           // --- HEADER CURVE ---
@@ -249,7 +254,7 @@ class _ResultScreenState extends State<ResultScreen>
                 physics: const BouncingScrollPhysics(),
                 child: Column(
                   children: [
-                    // --- PRODUCT IMAGE  ---
+                    // --- PRODUCT IMAGE ---
                     ScaleTransition(
                       scale: _imageScaleAnim,
                       child: AnimatedBuilder(
@@ -262,9 +267,9 @@ class _ResultScreenState extends State<ResultScreen>
                               height: 200,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white,
+                                color: cardColor, // Dynamic circle background
                                 border: Border.all(
-                                  color: Colors.white,
+                                  color: cardColor, // Dynamic circle border
                                   width: 8,
                                 ),
                                 boxShadow: [
@@ -283,9 +288,9 @@ class _ResultScreenState extends State<ResultScreen>
                                         widget.result.imageUrl!,
                                         fit: BoxFit.cover,
                                         errorBuilder: (c, e, s) =>
-                                            _getFallbackImage(),
+                                            _getFallbackImage(isDark),
                                       )
-                                    : _getFallbackImage(),
+                                    : _getFallbackImage(isDark),
                               ),
                             ),
                           );
@@ -332,7 +337,7 @@ class _ResultScreenState extends State<ResultScreen>
                     ),
                     const SizedBox(height: 25),
 
-                    // --- DESCRIPTION CARD & ALTERNATIVES  ---
+                    // --- DESCRIPTION CARD & ALTERNATIVES ---
                     SlideTransition(
                       position: _cardSlideAnim,
                       child: FadeTransition(
@@ -407,7 +412,7 @@ class _ResultScreenState extends State<ResultScreen>
                                     style: GoogleFonts.poppins(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
+                                      color: textPrimary,
                                     ),
                                   ),
                                 ),

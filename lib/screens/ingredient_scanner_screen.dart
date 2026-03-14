@@ -15,8 +15,7 @@ class IngredientScannerScreen extends StatefulWidget {
   const IngredientScannerScreen({super.key, required this.scannedBarcode});
 
   @override
-  State<IngredientScannerScreen> createState() =>
-      _IngredientScannerScreenState();
+  State<IngredientScannerScreen> createState() => _IngredientScannerScreenState();
 }
 
 class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
@@ -108,19 +107,14 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
 
     try {
       final String productName = _nameController.text.trim();
-      final List<dynamic> ingredientsList =
-          _extractedData?['ingredients'] ?? [];
+      final List<dynamic> ingredientsList = _extractedData?['ingredients'] ?? [];
 
-      // MERGE LOGIC: Combine API data with existing SQLite data!
       Map<String, dynamic> firestoreData = {
         'name': productName,
         'barcode': widget.scannedBarcode,
         'ingredients': ingredientsList,
         'nutrition': _extractedData?['nutrition'] ?? {},
-        'category':
-            _extractedData?['category'] ??
-            _localProductData?['categories'] ??
-            "Unknown",
+        'category': _extractedData?['category'] ?? _localProductData?['categories'] ?? "Unknown",
         'image_url': _localProductData?['image_url'],
         'nutriscore': _localProductData?['nutriscore'],
         'nova_group': _localProductData?['nova_group'],
@@ -136,25 +130,18 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Product added"),
-            backgroundColor: Colors.green,
-          ),
+          const SnackBar(content: Text("Product added"), backgroundColor: Colors.green),
         );
 
         final scanService = ScanService();
-        final newScanResult = await scanService.processBarcode(
-          widget.scannedBarcode,
-        );
+        final newScanResult = await scanService.processBarcode(widget.scannedBarcode);
 
         setState(() => _isSaving = false);
 
         if (newScanResult != null && mounted) {
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(
-              builder: (context) => ResultScreen(result: newScanResult),
-            ),
+            MaterialPageRoute(builder: (context) => ResultScreen(result: newScanResult)),
             (route) => route.isFirst,
           );
         } else if (mounted) {
@@ -165,10 +152,7 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
       if (mounted) {
         setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Failed to save: $e"),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text("Failed to save: $e"), backgroundColor: Colors.red),
         );
       }
     }
@@ -176,15 +160,20 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF121212) : Colors.white;
+    final textPrimary = isDark ? Colors.white : Colors.black87;
+    final textSecondary = isDark ? Colors.white70 : Colors.black54;
+    final pillBgColor = isDark ? const Color(0xFF2A3D1E) : const Color(0xFFF4F9DD);
+    final cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+    final borderColor = isDark ? Colors.white24 : Colors.black12;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: bgColor,
       appBar: AppBar(
         title: Text(
           "Add Missing Product",
-          style: GoogleFonts.poppins(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
+          style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.w600),
         ),
         backgroundColor: const Color(0xFF557B3E),
         iconTheme: const IconThemeData(color: Colors.white),
@@ -212,25 +201,18 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
                 ],
               )
             : _extractedData != null
-            ? _buildResultView()
+            ? _buildResultView(textPrimary, textSecondary, pillBgColor, cardColor, borderColor)
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.document_scanner,
-                    size: 80,
-                    color: Color(0xFF557B3E),
-                  ),
+                  const Icon(Icons.document_scanner, size: 80, color: Color(0xFF557B3E)),
                   const SizedBox(height: 20),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 40),
                     child: Text(
                       "Take a clear photo of the Ingredients list and Nutritional table.",
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(
-                        color: Colors.black87,
-                        fontSize: 16,
-                      ),
+                      style: GoogleFonts.poppins(color: textPrimary, fontSize: 16),
                     ),
                   ),
                   const SizedBox(height: 40),
@@ -239,20 +221,12 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
                     icon: const Icon(Icons.camera_alt, color: Colors.white),
                     label: Text(
                       "Open Camera",
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                      style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF557B3E),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 30,
-                        vertical: 15,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                     ),
                   ),
                 ],
@@ -261,11 +235,9 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
     );
   }
 
-  Widget _buildResultView() {
+  Widget _buildResultView(Color textPrimary, Color textSecondary, Color pillBgColor, Color cardColor, Color borderColor) {
     final ingredients = List<String>.from(_extractedData?['ingredients'] ?? []);
-    final nutrition = Map<String, dynamic>.from(
-      _extractedData?['nutrition'] ?? {},
-    );
+    final nutrition = Map<String, dynamic>.from(_extractedData?['nutrition'] ?? {});
 
     return Padding(
       padding: const EdgeInsets.all(20.0),
@@ -283,22 +255,19 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
           const SizedBox(height: 20),
           TextField(
             controller: _nameController,
-            style: const TextStyle(color: Colors.black87),
+            style: TextStyle(color: textPrimary),
             decoration: InputDecoration(
               labelText: "What is the product's name?",
-              labelStyle: const TextStyle(color: Colors.black54),
+              labelStyle: TextStyle(color: textSecondary),
               enabledBorder: OutlineInputBorder(
-                borderSide: const BorderSide(color: Colors.black12),
+                borderSide: BorderSide(color: borderColor),
                 borderRadius: BorderRadius.circular(15),
               ),
               focusedBorder: OutlineInputBorder(
-                borderSide: const BorderSide(
-                  color: Color(0xFF8CC63F),
-                  width: 2,
-                ),
+                borderSide: const BorderSide(color: Color(0xFF8CC63F), width: 2),
                 borderRadius: BorderRadius.circular(15),
               ),
-              prefixIcon: const Icon(Icons.fastfood, color: Colors.black54),
+              prefixIcon: Icon(Icons.fastfood, color: textSecondary),
             ),
           ),
           const SizedBox(height: 20),
@@ -311,7 +280,7 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
                   Text(
                     "Ingredients Found:",
                     style: GoogleFonts.poppins(
-                      color: Colors.black87,
+                      color: textPrimary,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
@@ -323,24 +292,18 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
                     children: ingredients
                         .map(
                           (ing) => Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 8,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF4F9DD),
+                              color: pillBgColor,
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: const Color(0xFF8CC63F),
-                                width: 1,
-                              ),
+                              border: Border.all(color: const Color(0xFF8CC63F), width: 1),
                             ),
                             child: Text(
                               ing,
                               style: GoogleFonts.poppins(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
-                                color: Colors.black87,
+                                color: textPrimary,
                               ),
                             ),
                           ),
@@ -351,7 +314,7 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
                   Text(
                     "Nutrition Found:",
                     style: GoogleFonts.poppins(
-                      color: Colors.black87,
+                      color: textPrimary,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
@@ -360,9 +323,9 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: cardColor,
                       borderRadius: BorderRadius.circular(15),
-                      border: Border.all(color: Colors.black12),
+                      border: Border.all(color: borderColor),
                     ),
                     child: Column(
                       children: nutrition.entries.map((e) {
@@ -374,14 +337,14 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
                               Text(
                                 e.key.toUpperCase(),
                                 style: GoogleFonts.poppins(
-                                  color: Colors.black54,
+                                  color: textSecondary,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                               Text(
                                 e.value.toString(),
                                 style: GoogleFonts.poppins(
-                                  color: Colors.black87,
+                                  color: textPrimary,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -403,18 +366,12 @@ class _IngredientScannerScreenState extends State<IngredientScannerScreen> {
               onPressed: _isSaving ? null : _saveToDatabase,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF557B3E),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
               ),
               child: _isSaving
                   ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
+                      height: 20, width: 20,
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                     )
                   : Text(
                       "Save to Database",

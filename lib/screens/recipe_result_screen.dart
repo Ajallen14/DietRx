@@ -117,6 +117,11 @@ class _RecipeResultScreenState extends State<RecipeResultScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final domeColor = isDark ? const Color(0xFF121212) : Colors.white;
+    final textPrimary = isDark ? Colors.white : Colors.black87;
+    final textSecondary = isDark ? Colors.white54 : Colors.black54;
+
     final bool isSafe = widget.evaluation['isSafe'];
     final List<String> warnings = List<String>.from(
       widget.evaluation['warnings'],
@@ -234,13 +239,13 @@ class _RecipeResultScreenState extends State<RecipeResultScreen>
                     physics: const BouncingScrollPhysics(),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
-                        minHeight: MediaQuery.of(context).size.height * 0.75,
+                        minHeight: MediaQuery.of(context).size.height * 1,
                       ),
                       child: Container(
                         margin: const EdgeInsets.only(top: 20),
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: domeColor,
                           borderRadius: BorderRadius.vertical(
                             top: Radius.elliptical(
                               MediaQuery.of(context).size.width,
@@ -353,7 +358,7 @@ class _RecipeResultScreenState extends State<RecipeResultScreen>
                                                 style: GoogleFonts.poppins(
                                                   fontSize: 22,
                                                   fontWeight: FontWeight.bold,
-                                                  color: Colors.black87,
+                                                  color: textPrimary,
                                                 ),
                                               ),
                                               const SizedBox(width: 12),
@@ -465,8 +470,8 @@ class _RecipeResultScreenState extends State<RecipeResultScreen>
                                                               child: Text(
                                                                 sub,
                                                                 style: GoogleFonts.poppins(
-                                                                  color: Colors
-                                                                      .black87,
+                                                                  color:
+                                                                      textPrimary,
                                                                   fontSize: 15,
                                                                   height: 1.4,
                                                                 ),
@@ -481,7 +486,7 @@ class _RecipeResultScreenState extends State<RecipeResultScreen>
                                             : Text(
                                                 "No specific substitutions found.",
                                                 style: GoogleFonts.poppins(
-                                                  color: Colors.black54,
+                                                  color: textSecondary,
                                                 ),
                                               ),
                                       ],

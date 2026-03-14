@@ -109,8 +109,14 @@ class _RecipeScreenState extends State<RecipeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF121212) : Colors.white;
+    final textPrimary = isDark ? Colors.white : Colors.black87;
+    final textSecondary = isDark ? Colors.white70 : Colors.black54;
+    final dividerColor = isDark ? Colors.white24 : Colors.black12;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: bgColor,
       appBar: AppBar(
         title: Text(
           "Recipe Analyzer",
@@ -149,7 +155,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                   Text(
                     "Analyzing recipe...",
                     style: GoogleFonts.poppins(
-                      color: Colors.black54,
+                      color: textSecondary,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
@@ -165,7 +171,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                   Text(
                     "Scan a Cookbook or Menu",
                     style: GoogleFonts.poppins(
-                      color: Colors.black87,
+                      color: textPrimary,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -174,7 +180,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                   Text(
                     "Take a photo of a recipe or upload a screenshot to extract ingredients instantly.",
                     style: GoogleFonts.poppins(
-                      color: Colors.black54,
+                      color: textSecondary,
                       fontSize: 14,
                     ),
                   ),
@@ -186,6 +192,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                           icon: Icons.camera_alt,
                           label: "Camera",
                           onTap: () => _processImage(ImageSource.camera),
+                          isDark: isDark,
                         ),
                       ),
                       const SizedBox(width: 15),
@@ -194,19 +201,20 @@ class _RecipeScreenState extends State<RecipeScreen> {
                           icon: Icons.photo_library,
                           label: "Gallery",
                           onTap: () => _processImage(ImageSource.gallery),
+                          isDark: isDark,
                         ),
                       ),
                     ],
                   ),
 
                   const SizedBox(height: 40),
-                  const Divider(color: Colors.black12, thickness: 1),
+                  Divider(color: dividerColor, thickness: 1),
                   const SizedBox(height: 40),
 
                   Text(
                     "Paste a Recipe",
                     style: GoogleFonts.poppins(
-                      color: Colors.black87,
+                      color: textPrimary,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -215,7 +223,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                   Text(
                     "Paste the text or ingredients list here.",
                     style: GoogleFonts.poppins(
-                      color: Colors.black54,
+                      color: textSecondary,
                       fontSize: 14,
                     ),
                   ),
@@ -223,18 +231,17 @@ class _RecipeScreenState extends State<RecipeScreen> {
 
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                      color: isDark ? Colors.black45 : Colors.grey.shade100,
                       borderRadius: BorderRadius.circular(15),
-                      border: Border.all(color: Colors.black12),
+                      border: Border.all(color: dividerColor),
                     ),
                     child: TextField(
                       controller: _recipeTextController,
                       maxLines: 8,
-                      style: const TextStyle(color: Colors.black87),
+                      style: TextStyle(color: textPrimary),
                       decoration: InputDecoration(
-                        hintText:
-                            "e.g., 2 cups flour\n1 tsp baking soda\n1/2 cup sugar...",
-                        hintStyle: const TextStyle(color: Colors.grey),
+                        hintText: "e.g., 2 cups flour\n1 tsp baking soda\n1/2 cup sugar...",
+                        hintStyle: TextStyle(color: textSecondary),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.all(16),
                       ),
@@ -275,6 +282,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
     required IconData icon,
     required String label,
     required VoidCallback onTap,
+    required bool isDark,
   }) {
     return InkWell(
       onTap: onTap,
@@ -282,7 +290,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
       child: Container(
         height: 100,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
           borderRadius: BorderRadius.circular(15),
           border: Border.all(color: const Color(0xFF8CC63F), width: 1.5),
         ),
@@ -294,7 +302,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
             Text(
               label,
               style: GoogleFonts.poppins(
-                color: Colors.black87,
+                color: isDark ? Colors.white : Colors.black87,
                 fontWeight: FontWeight.w600,
               ),
             ),

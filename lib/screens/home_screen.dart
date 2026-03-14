@@ -34,11 +34,9 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-// Fetch history from Database
   Future<void> _loadHistory() async {
     try {
       List<Map<String, dynamic>> data = [];
-      
       await Future.wait([
         DatabaseHelper().getScanHistory().then((res) => data = res),
         Future.delayed(const Duration(seconds: 2)),
@@ -67,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 'safe':
         return Colors.green;
       case 'unsafe':
-        return Colors.red;
+        return Colors.redAccent;
       case 'unknown':
       default:
         return Colors.orange;
@@ -88,8 +86,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFF9FAFB);
+    final cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+    final textPrimary = isDark ? Colors.white : Colors.black87;
+    final textSecondary = isDark ? Colors.white54 : Colors.black54;
+    final borderColor = isDark ? Colors.white12 : Colors.black12;
+
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: bgColor,
       appBar: AppBar(
         title: Text(
           "DietRx",
@@ -117,17 +122,16 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
 
-      // --- SCAN HISTORY ---
       body: _isLoadingHistory
-          ? const CustomLoading(
-              message: "Loading Scans...", 
-              textColor: Colors.white,
+          ? CustomLoading(
+              message: "Loading Scans...",
+              textColor: textPrimary,
             )
           : _history.isEmpty
           ? Center(
               child: Text(
                 "No scanned items yet.",
-                style: GoogleFonts.poppins(color: Colors.white54, fontSize: 16),
+                style: GoogleFonts.poppins(color: textSecondary, fontSize: 16),
               ),
             )
           : Column(
@@ -140,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: textPrimary,
                     ),
                   ),
                 ),
@@ -157,63 +161,52 @@ class _HomeScreenState extends State<HomeScreen> {
                       try {
                         if (scanTime.isNotEmpty) {
                           DateTime parsedDate = DateTime.parse(scanTime);
-                          String day = parsedDate.day.toString().padLeft(
-                            2,
-                            '0',
-                          );
-                          String month = parsedDate.month.toString().padLeft(
-                            2,
-                            '0',
-                          );
+                          String day = parsedDate.day.toString().padLeft(2, '0');
+                          String month = parsedDate.month.toString().padLeft(2, '0');
                           String year = parsedDate.year.toString();
                           scanTime = "$day - $month - $year";
                         }
                       } catch (e) {}
 
                       return Card(
-                        color: Colors.grey[900],
+                        color: cardColor,
                         margin: const EdgeInsets.only(bottom: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
+                          side: BorderSide(color: borderColor, width: 1),
                         ),
-                        elevation: 0,
+                        elevation: isDark ? 0 : 2,
+                        shadowColor: Colors.black12,
                         child: ListTile(
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 8,
                           ),
-
-                          // Left Side: Image
                           leading: Container(
                             width: 55,
                             height: 55,
                             decoration: BoxDecoration(
-                              color: Colors.grey[850],
+                              color: isDark ? Colors.grey[850] : Colors.grey[200],
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child:
-                                item['image_url'] != null &&
+                            child: item['image_url'] != null &&
                                     item['image_url'].toString().isNotEmpty
                                 ? ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
                                     child: Image.network(
                                       item['image_url'],
                                       fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              const SizedBox(),
+                                      errorBuilder: (context, error, stackTrace) => const SizedBox(),
                                     ),
                                   )
                                 : const SizedBox(),
                           ),
-
-                          // Middle: Name & Date
                           title: Text(
                             item['name'] ?? 'Unknown Product',
                             style: GoogleFonts.poppins(
                               fontWeight: FontWeight.w600,
                               fontSize: 16,
-                              color: Colors.white,
+                              color: textPrimary,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -223,18 +216,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: Text(
                               scanTime,
                               style: GoogleFonts.poppins(
-                                color: Colors.white54,
+                                color: textSecondary,
                                 fontSize: 12,
                               ),
                             ),
                           ),
-
-                          // Right Side: Status Icon
-                          trailing: Icon(
-                            statusIcon,
-                            color: statusColor,
-                            size: 28,
-                          ),
+                          trailing: Icon(statusIcon, color: statusColor, size: 28),
                         ),
                       );
                     },
@@ -243,7 +230,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
 
-      // --- FAB ---
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 80.0),
@@ -256,7 +242,7 @@ class _HomeScreenState extends State<HomeScreen> {
           closedShape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          closedColor: _isDbReady ? const Color(0xFF1B4D3E) : Colors.grey[800]!,
+          closedColor: _isDbReady ? const Color(0xFF1B4D3E) : (isDark ? Colors.grey[800]! : Colors.grey[300]!),
           tappable: _isDbReady,
           closedBuilder: (context, openContainer) {
             return Container(
