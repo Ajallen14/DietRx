@@ -94,7 +94,7 @@ class _DietRxSplashScreenState extends State<DietRxSplashScreen>
             ScaleTransition(
               scale: _logoScaleAnimation,
               child: Image.asset(
-                'assets/images/logo_icon.png',
+                'assets/images/app_icon.png',
                 width: 150,
                 height: 150,
               ),
