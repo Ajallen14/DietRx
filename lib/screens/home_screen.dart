@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
         "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
     for (var item in _history) {
-      // 1. Calculate Pie Chart Stats
+      // Calculate Pie Chart Stats
       if (item['status'] == 'safe') _safeCount++;
       if (item['status'] == 'unsafe') _unsafeCount++;
 
@@ -98,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     _scannedToday = uniqueScanDates.contains(todayStr);
 
-    // 3. Calculate Streak
+    // Calculate Streak
     int streak = 0;
     DateTime checkDate = _scannedToday
         ? now
@@ -122,11 +122,12 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_currentStreak == 0) return 0.7; // Smallest
     if (_currentStreak == 1) return 1.0; // Normal
     if (_currentStreak == 2) return 1.3; // Bigger
-    return 1.6; // Max size
+    return 1.6; // Max size for 3+ days
   }
 
   @override
   Widget build(BuildContext context) {
+    // 🚀 DYNAMIC THEME CHECK
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFF9FAFB);
     final cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
@@ -236,7 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               SizedBox(
                 height: 120,
-                width: 120, // Constrained width so the flame doesn't block text
+                width: 120,
                 child: Transform.scale(
                   scale: _getFlameScale(),
                   child: Lottie.asset(
@@ -512,7 +513,11 @@ class _HomeScreenState extends State<HomeScreen> {
     Color textSecondary,
     Color cardColor,
   ) {
-    if (_history.isEmpty) return const SizedBox();
+    final recentScans = _history
+        .where((item) => item['status'] != 'unknown')
+        .toList();
+
+    if (recentScans.isEmpty) return const SizedBox();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -536,9 +541,9 @@ class _HomeScreenState extends State<HomeScreen> {
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 15),
-            itemCount: _history.length,
+            itemCount: recentScans.length,
             itemBuilder: (context, index) {
-              final item = _history[index];
+              final item = recentScans[index];
               final isSafe = item['status'] == 'safe';
               final borderColor = isSafe ? _borderGreen : _borderRed;
 
