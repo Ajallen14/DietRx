@@ -43,8 +43,6 @@ DietRx eliminates the cognitive load and anxiety of label-reading. We solved thi
 
 ## Screenshots
 
-*(Replace these placeholders with actual screenshots of your app!)*
-
 #### Health Profile
 
 #### Dashboard
