@@ -108,6 +108,6 @@ Follow these steps to set up the project locally on your machine.
 
 ## 📝 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the MIT License. See [`LICENSE`](https://github.com/Ajallen14/DietRx/blob/main/LICENSE) for more information.
 
 ---
