@@ -10,7 +10,7 @@ class ScanService {
   Future<ScanResult?> processBarcode(String barcode) async {
     Map<String, dynamic>? product;
 
-    // 🚀 1. CHECK FIREBASE FIRST
+    // 1. CHECK FIREBASE FIRST
     try {
       var doc = await FirebaseFirestore.instance
           .collection('Products')
@@ -60,7 +60,7 @@ class ScanService {
       print("Error fetching from Firebase: $e");
     }
 
-    // 🚀 2. CHECKLOCAL SQLITE
+    // 2. CHECKLOCAL SQLITE
     product ??= await _dbHelper.getProduct(barcode);
 
     // 3. If neither database has it, return null.

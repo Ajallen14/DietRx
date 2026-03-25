@@ -27,7 +27,6 @@ class ProfileService {
         
         if (!ruleDoc.exists) {
           // --- STEP 3: Not in Firebase either! Call API ---
-          print("🔍 $formattedName is completely unknown. Asking Gemini...");
           
           HealthRule? newRule = await DynamicRuleService.generateRuleForCondition(
             formattedName, 
@@ -64,8 +63,6 @@ class ProfileService {
           'conditions': FieldValue.arrayUnion([formattedName])
         }, SetOptions(merge: true));
       }
-
-      print("Successfully added $formattedName to profile!");
 
     } catch (e) {
       print("Error adding custom condition: $e");

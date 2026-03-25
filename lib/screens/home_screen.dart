@@ -74,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
   }
-
+  
   void _calculateStatsAndStreak() {
     _safeCount = 0;
     _unsafeCount = 0;
@@ -127,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 🚀 DYNAMIC THEME CHECK
+    // DYNAMIC THEME CHECK
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFF9FAFB);
     final cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
