@@ -35,7 +35,7 @@ DietRx eliminates the cognitive load and anxiety of label-reading. We solved thi
 ## Tech Stack
 
 * **Frontend:** [Flutter](https://flutter.dev/) (Dart)
-* **Backend & Database:** [Firebase Firestore](https://firebase.google.com/products/firestore)
+* **Backend & Database:** [Firebase Firestore](https://firebase.google.com/products/firestore, SQLite
 * **Authentication:** [Firebase Auth](https://firebase.google.com/products/auth)
 * **AI Integration:** Gemini API (for dynamic rule generation)
 
