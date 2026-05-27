@@ -31,6 +31,10 @@ DietRx eliminates the cognitive load and anxiety of label-reading. We solved thi
 * **Beautiful & Responsive UI:** A smooth, intuitive interface featuring custom animations, staggered loading, and a clean, nature-inspired color palette.
 
 ---
+## Disclaimer ⚠️
+**Note on AI Features: The AI functionalities in this app are powered by the free tier of the Gemini API. Because of this, you might occasionally run into rate limits or slight delays if too many requests are made at once. If a feature fails, just give it a minute and try again!**
+
+---
 
 ## Tech Stack
 
