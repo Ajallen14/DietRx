@@ -43,16 +43,27 @@ DietRx eliminates the cognitive load and anxiety of label-reading. We solved thi
 
 ## Screenshots
 
-#### Health Profile
+#### Login
+<img width="302" height="672" alt="image" src="https://github.com/user-attachments/assets/24c084d9-0f6e-44ee-92a2-7660994ae565" />
 
-#### Dashboard
+
+#### Health Profile
+<img width="303" height="672" alt="image" src="https://github.com/user-attachments/assets/2a9e2b61-c182-477e-9cd7-01945d9691fe" />
 
 #### Safe vs. Unsafe Results
+<img width="1317" height="790" alt="image" src="https://github.com/user-attachments/assets/643fa850-9620-4e43-89b8-f6ea483a9add" />
 
----
 
-## Demo Video
+#### Unknown Product
+<img width="840" height="782" alt="image" src="https://github.com/user-attachments/assets/851c434a-9474-4773-90cf-57a74df11c91" />
 
+
+#### Profile screen
+<img width="355" height="790" alt="image" src="https://github.com/user-attachments/assets/b80aa302-2f1b-489a-903b-bf7ddfbfc604" />
+
+
+#### Recipe Analyzer
+<img width="928" height="782" alt="image" src="https://github.com/user-attachments/assets/e993f269-aefd-41aa-8a6b-57095e524c4f" />
 
 
 ---
